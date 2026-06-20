@@ -42,6 +42,29 @@ npm run preview  # preview the built site
 `npm run build` also regenerates the Open Graph card and the
 `llms.txt` / `llms-full.txt` answer-engine files via the `prebuild` step.
 
+## Deploy (GitHub Pages)
+
+`.github/workflows/deploy.yml` builds the site and publishes it to GitHub
+Pages. To turn it on, in the repo go to **Settings, Pages** and set
+**Source** to **GitHub Actions** (one time). The workflow then runs on every
+push to `main` that touches `site/`, and can also be run manually from the
+**Actions** tab (Run workflow) against any branch.
+
+The workflow reads the Pages origin and base path automatically, so the build
+works at the project subpath (`https://<owner>.github.io/<repo>/`) with all
+links, canonical URLs, the sitemap, and `llms.txt` correctly prefixed.
+
+The build is domain and base aware through two environment variables:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `SITE_URL` | `https://orp.dev` | The deployed origin (scheme + host). |
+| `BASE_PATH` | `/` | The path the site is served under, for example `/orp-site`. |
+
+When the real domain is ready, point DNS at Pages, add the custom domain in
+**Settings, Pages** (which sets the base back to `/`), and update the
+`SITE_URL` default in `site/site.config.mjs`.
+
 ## Repository layout
 
 | Path | What |

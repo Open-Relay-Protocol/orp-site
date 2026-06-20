@@ -2,10 +2,15 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
-import { SITE, GITHUB_URL } from "./site.config.mjs";
+import { SITE, BASE, GITHUB_URL } from "./site.config.mjs";
+import rehypeBaseLinks from "./scripts/rehype-base-links.mjs";
 
 export default defineConfig({
   site: SITE,
+  base: BASE,
+  markdown: {
+    rehypePlugins: [rehypeBaseLinks],
+  },
   integrations: [
     starlight({
       title: "ORP",

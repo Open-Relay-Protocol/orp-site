@@ -15,11 +15,14 @@ Resolve each item against the real repo before publishing.
 
 ## Domain
 
-2. `DOMAIN` is not final ("not 100% on domain yet"). The site currently uses
-   the placeholder `https://orp.dev` in `site/astro.config.mjs`. This is the
-   single source of truth for canonical URLs, the sitemap, OG tags, and the
-   absolute links in `llms.txt` / `llms-full.txt`. Change it in one place
-   when the domain is confirmed, then rebuild.
+2. `DOMAIN` is not final ("not 100% on domain yet"). The site is domain and
+   base aware via the `SITE_URL` and `BASE_PATH` env vars, with defaults in
+   `site/site.config.mjs` (`https://orp.dev` and `/`). The GitHub Pages
+   workflow (`.github/workflows/deploy.yml`) sets these automatically for the
+   project subpath. When the real domain is ready: add it as a custom domain
+   in Settings, Pages (base returns to `/`) and update the `SITE_URL` default
+   in `site/site.config.mjs`. `site/public/robots.txt` still hardcodes the
+   placeholder sitemap URL; update it when the domain is set.
 
 ## Spec section numbers and wording
 

@@ -1,0 +1,38 @@
+---
+title: Identity rotation (ORP-004)
+description: How devices rotate identity keys without breaking existing rendezvous bindings, the migration path, and the constraints behind the design.
+---
+
+Identity rotation (decision ORP-004, SPEC §12) lets a device change its
+identity keys over time without tearing down the rendezvous bindings it
+already holds.
+
+## Why rotation
+
+Long-lived identity keys are a liability: the longer a key lives, the more
+exposure a compromise carries. Rotation lets a device retire an old identity
+key and adopt a new one on a schedule or after a suspected compromise.
+
+## How a rotation works
+
+A rotation moves a device from an old identity key to a new one while
+preserving its ability to rendezvous at existing targets. The `core/identity`
+module provides the identity primitives and `core/migration` handles moving
+state across the rotation. `TODO: confirm the rotation procedure and message
+flow against SPEC §12 and core/identity / core/migration.`
+
+## What survives a rotation
+
+Existing rendezvous bindings survive, so a rotation does not force every peer
+to re-establish a key. `TODO: confirm exactly what state carries over.`
+
+## Constraints
+
+`TODO: confirm the constraints and any ordering or timing requirements on
+rotation against SPEC §12.`
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §12 (identity rotation, ORP-004); core/identity,
+  core/migration. TODO: confirm the procedure and constraints
+  (see OPEN-QUESTIONS.md).
+</div>

@@ -1,0 +1,122 @@
+---
+title: Frequently asked questions
+description: "Straight answers: can the server read my messages, does ORP have forward secrecy, is the board really stateless, how does this differ from Signal."
+head:
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Can the server read my messages?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. The rendezvous server is structurally blind: message contents, private keys, and unsealed signaling never reach it in readable form. It sees only opaque tags and sealed payloads it cannot open. This is enforced by the wire format, not by a logging policy."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does ORP have forward secrecy?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. The inner message layer is static and does not rekey per message, so a future key compromise can expose past sealed payloads. This is a stated trade-off, documented in SPEC section 9.3."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is the board really stateless?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The board exposes a single stateful channel and holds only the routing state it needs to broker a meeting. It does not hold readable message contents or keys. Capacity and channel behavior are defined in SPEC sections 7 and 8."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is this different from Signal's model?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "ORP targets the rendezvous and signaling layer and makes the server structurally unable to read signaling, keys, or contents, as an invariant of the wire format. It does not provide forward secrecy and it does not hide the social graph, both of which it states plainly. It is signaling infrastructure, not a full messenger."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can the server see who I talk to?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The board can observe that two endpoints rendezvous, which is the visible social graph described in SPEC section 9.4. It cannot read what they exchange. ORP does not claim full anonymity."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What happens if a key is compromised?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Because there is no forward secrecy, a compromised key can expose past sealed payloads encrypted under it. A key is bound to one target, so the exposure is scoped to that target rather than a whole directory. Identity rotation (ORP-004) limits the lifetime of an identity key."
+            }
+          }
+        ]
+      }
+---
+
+Short, direct answers. Each links to the page that expands it.
+
+## Can the server read my messages?
+
+No. The rendezvous server is structurally blind. Message contents, private
+keys, and unsealed signaling never reach it in readable form: it sees only
+opaque tags and sealed payloads it cannot open. This is enforced by the wire
+format, not by a logging policy. See
+[the blindness invariant](/docs/blindness/).
+
+## Does ORP have forward secrecy?
+
+No. The inner message layer is static and does not rekey per message, so a
+future key compromise can expose past sealed payloads. This is a stated
+trade-off. See [no forward secrecy](/docs/threat-model/#no-forward-secrecy).
+
+## Is the board really stateless?
+
+The board exposes a single stateful channel and holds only the routing state
+it needs to broker a meeting. It does not hold readable contents or keys.
+See [the single stateful channel](/docs/protocol/#the-single-stateful-channel).
+
+## How is this different from Signal's model?
+
+ORP targets the rendezvous and signaling layer. It makes the server
+structurally unable to read signaling, keys, or contents as an invariant of
+the wire format. It does not provide forward secrecy and it does not hide the
+social graph, and it says so. It is signaling infrastructure, not a full
+messenger. See the [comparison page](/compare/).
+
+## Can the server see who I talk to?
+
+The board can observe that two endpoints rendezvous, the visible social graph
+(SPEC §9.4). It cannot read what they exchange. ORP does not claim full
+anonymity. See [the social graph is visible](/docs/threat-model/#the-social-graph-is-visible).
+
+## What happens if a key is compromised?
+
+Because there is no forward secrecy, a compromised key can expose past sealed
+payloads encrypted under it. A key is bound to one target, so the exposure is
+scoped to that target, not a directory. [Identity rotation](/docs/identity-rotation/)
+limits how long an identity key lives.
+
+## Do I need to run TURN?
+
+Only if you want relay-only operation so peers do not learn each other's
+network addresses. TURN is optional. See
+[optional TURN for relay-only](/docs/transport-gap/#optional-turn-for-relay-only).
+
+## What do I have to build for production?
+
+A WebSocket `RendezvousBroker` adapter and a real `WebRTCEndpoint`, and
+optionally TURN. See [the production-transport gap](/docs/transport-gap/).
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §1, §7, §8, §9.3, §9.4, §10; README. TODO:
+  confirm section numbers and answers against the repo (see OPEN-QUESTIONS.md).
+</div>

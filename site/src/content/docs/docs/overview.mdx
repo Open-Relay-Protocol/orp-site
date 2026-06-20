@@ -1,0 +1,51 @@
+---
+title: What ORP is
+description: ORP brokers a meeting between two devices that share one key bound to one target, while the server stays structurally unable to read what they exchange.
+---
+
+ORP is a device-first messaging protocol whose rendezvous server is
+structurally unable to read message contents, keys, or unsealed signaling.
+The server brokers a meeting between two devices that already share one key
+bound to one target, and that blindness is an enforced invariant of the wire
+format, not a logging policy the operator promises to follow.
+
+## The one-key-one-target model
+
+ORP binds a shared key to a single rendezvous target. Possessing the key
+lets exactly two parties meet at exactly one point, and nothing wider. There
+is no broadcast surface and no directory the board can mine: a key opens one
+door and only that door.
+
+## The blindness invariant in plain terms
+
+The board (the rendezvous server) never receives readable contents, private
+keys, or unsealed signaling. What crosses it is reduced to opaque presence
+and routing tags plus sealed payloads it cannot open. Because no frame shape
+carries plaintext the board could read, blindness does not depend on the
+operator choosing not to log. Remove the operator's good behavior from the
+model entirely and the property still holds.
+
+## What the board does and does not see
+
+- **Does see:** opaque presence tags, a routing tag (`frame_kind`) that lets
+  it forward frames, and sealed payloads it cannot open. It can therefore
+  observe that two endpoints rendezvous (the social graph, see the
+  [threat model](/docs/threat-model/)).
+- **Does not see:** message contents, private keys, or unsealed WebRTC
+  signaling (SDP and ICE).
+
+## Where to go next
+
+- [Quickstart](/docs/quickstart/): install, test, and run the demo.
+- [Protocol reference](/docs/protocol/): wire types and the KEY/offer/answer
+  phases.
+- [The blindness invariant](/docs/blindness/): the collision analysis behind
+  one key, one target.
+- [Threat model](/docs/threat-model/): adversaries, protections, and the
+  stated trade-offs.
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §0/§1 (blindness invariant, one-key-one-target),
+  SPEC §7 (single stateful channel). TODO: confirm section numbers against the
+  upstream spec (see OPEN-QUESTIONS.md).
+</div>

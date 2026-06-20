@@ -1,0 +1,53 @@
+---
+title: The blindness invariant and collision analysis
+description: How ORP's wire format makes the rendezvous server structurally blind, plus the collision analysis behind the one-key-one-target model.
+---
+
+ORP's central property is that the rendezvous server is structurally blind:
+it cannot read message contents, keys, or unsealed signaling, and that holds
+as a property of the wire format rather than a promise from the operator.
+
+## What "structurally blind" means
+
+Structural blindness means there is no frame shape on the wire that carries
+plaintext the board could read. Contrast that with a logging policy, where a
+server is technically able to read traffic and merely declines to store it.
+With ORP you do not have to trust the decline: the readable data never
+reaches the board in the first place.
+
+## The collision table
+
+The README presents a collision analysis tying each observable on the board
+to what it could and could not reveal. The structure of that table is:
+
+| Board observable | What it could reveal | Why it does not |
+| --- | --- | --- |
+| Presence tag | That some party is present at a target | The tag is opaque; it does not name the party. |
+| `frame_kind` tag | Which phase a frame belongs to | It is a routing label, not contents. |
+| Sealed payload | The offer/answer signaling | Sealed to the board; only the paired peer can open it. |
+| Pairing of endpoints | That two endpoints rendezvous | This is the visible social graph; ORP does not hide it. |
+
+`TODO: reproduce the exact rows and figures from the README collision table.`
+
+## Why one key maps to one target
+
+A shared key is bound to a single rendezvous target. That binding is what
+makes the collision analysis tractable: a key cannot be used to fan out
+across many targets or to enumerate a directory, so the board cannot turn one
+captured key into a wide view. One key opens one door.
+
+## Invariant vs policy
+
+The distinction the whole project rests on:
+
+- A **policy** ("we do not log") is an operational choice that can be changed,
+  compelled, or broken without any visible change to the wire.
+- An **invariant** ("the board cannot read this") is enforced by the format
+  and is testable from the outside, which is what the
+  [adversarial test suite](/docs/quickstart/) does.
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §0/§1 (the invariant), README collision
+  analysis. TODO: confirm the collision table values and section numbers
+  (see OPEN-QUESTIONS.md).
+</div>

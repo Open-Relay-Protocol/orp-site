@@ -1,0 +1,53 @@
+---
+title: Operating the board
+description: "Deploy the rendezvous board: environment variables, autoscaling, the freemem caveat, a TLS reverse proxy, and the AGPL network obligation."
+---
+
+This page covers running the rendezvous board in production. It follows the
+deployment recipe in the README.
+
+## Deployment recipe
+
+The board is the rendezvous server: it routes opaque tags and forwards sealed
+payloads. Because of the blindness invariant, an operator who runs the board
+still cannot read user traffic. `TODO: reproduce the exact deployment recipe
+steps from the README.`
+
+## Environment variables
+
+The board is configured by environment variables.
+
+| Variable | Purpose |
+| --- | --- |
+| `TODO` | TODO: confirm the env var names, defaults, and required vs optional against the README and board/. |
+
+`TODO: fill this table from the board configuration.`
+
+## Autoscaling and the os.freemem() caveat
+
+When autoscaling the board, note the documented caveat that inside a
+container `os.freemem()` reports host memory, not the container's limit, so
+memory-based scaling signals can be misleading. Plan capacity accordingly.
+`TODO: confirm the exact caveat wording and recommended mitigation.`
+
+## TLS reverse proxy
+
+Terminate TLS at a reverse proxy in front of the board rather than in the
+board process itself. `TODO: confirm the recommended proxy configuration from
+the README.`
+
+## The AGPL network obligation
+
+The board is licensed under AGPL-3.0. Because the board is a network service,
+the AGPL network obligation (AGPL §13) applies: if you run a modified board
+and expose it over a network, you must offer users of that service the
+corresponding source of your modified version. The Apache-licensed core,
+client, spec, and tests do not carry this obligation; only the board does.
+
+See [licensing](/docs/overview/) and the repository `LICENSING.md`.
+
+<div class="orp-source">
+  <strong>Source:</strong> README (deployment recipe, env vars, freemem caveat,
+  TLS), LICENSING.md and AGPL §13 (network obligation), SPEC §13. TODO: confirm
+  the recipe, env vars, and obligation wording (see OPEN-QUESTIONS.md).
+</div>

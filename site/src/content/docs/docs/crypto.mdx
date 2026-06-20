@@ -1,0 +1,50 @@
+---
+title: Cryptographic controls
+description: The sealed-box control, the ICE transport policy, the static inner message layer, and the delivery acknowledgement layer that keep the board blind.
+---
+
+The blindness invariant is upheld by a small set of cryptographic controls.
+Each one removes a category of readable data from the board's view.
+
+## Control a: the sealed box
+
+The signaling payloads (the WebRTC offer and answer) are wrapped in a sealed
+box so that only the intended paired peer can open them. The board forwards
+the sealed bytes without the ability to decrypt them. This is what keeps the
+SDP and ICE out of the board's reach during the offer/answer phases.
+
+Implemented in `core/sealedbox`.
+
+## Control b: the ICE policy
+
+ICE candidate handling follows a transport policy that governs how
+connectivity is established without leaking more than necessary to the board.
+Relay-only operation (forcing traffic through TURN) is available when a
+deployer wants to avoid exposing peer addresses to each other; see the
+[production-transport gap](/docs/transport-gap/).
+
+Implemented in `core/ice`. `TODO: confirm the exact ICE policy options.`
+
+## The static inner message layer
+
+Inside the sealed channel sits a static inner message layer that carries the
+application messages. It is static, meaning it does not rekey per message,
+which is the design choice behind the absence of forward secrecy
+(see [no forward secrecy](/docs/threat-model/#no-forward-secrecy)).
+
+Implemented in `core/messagelayer`.
+
+## The delivery acknowledgement layer
+
+A delivery acknowledgement layer (SPEC §11) provides delivery confirmation on
+top of the message layer. `TODO: confirm the ACK semantics and ordering
+guarantees against SPEC §11 and core/deliverylayer.`
+
+Implemented in `core/deliverylayer`.
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §9.3 (static layer / forward secrecy), §11
+  (delivery ACK); core/sealedbox, core/ice, core/messagelayer,
+  core/deliverylayer. TODO: confirm control details against the repo
+  (see OPEN-QUESTIONS.md).
+</div>

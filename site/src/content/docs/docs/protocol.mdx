@@ -1,0 +1,79 @@
+---
+title: Protocol reference
+description: The presence, intent, and match frames, the frame_kind routing tag, the KEY/offer/answer phases, JSON Schemas, and canonical-JSON signing.
+---
+
+This page describes the ORP wire format and the connection state machine. It
+mirrors the wire types in the spec and the encoders in `core/wire`,
+`core/schemas`, and `core/protocol`.
+
+## Wire frame types
+
+ORP frames cross the board as opaque tags plus sealed payloads. There are
+three frame types.
+
+### Presence frame
+
+Announces that a party is present at a rendezvous target, expressed as an
+opaque tag. The board can route on the tag but learns nothing about who is
+present beyond the tag itself.
+
+### Intent frame
+
+Signals intent to connect for a matched target, moving a pair from "both
+present" toward an active exchange.
+
+### Match frame
+
+Carries the matched-pair signaling exchange across the board. The signaling
+payload (the WebRTC offer and answer) is sealed, so the board forwards it
+without reading it.
+
+## The frame_kind routing tag
+
+Every frame carries a `frame_kind` routing tag. This is what lets the board
+route frames on the single stateful channel without opening payloads: it
+reads the tag, not the contents.
+
+## The KEY / offer / answer phases
+
+A rendezvous proceeds through three phases:
+
+1. **KEY** establishes or confirms the shared key bound to the target.
+2. **Offer** carries the initiating peer's sealed WebRTC offer.
+3. **Answer** carries the responding peer's sealed WebRTC answer.
+
+The offer and answer payloads are SDP and ICE signaling, sealed so the board
+relays them blind. See [cryptographic controls](/docs/crypto/) for the
+sealing.
+
+## JSON Schemas
+
+The frame and payload shapes are defined as JSON Schemas in `core/schemas`,
+which the wire layer validates against. `TODO: enumerate the schema names and
+required fields against core/schemas.`
+
+## Canonical-JSON signing
+
+Signatures are computed over a canonical JSON serialization so that the bytes
+signed are stable and reproducible across implementations. `core/canonical`
+produces the canonical form and `core/sign` produces detached signatures over
+it.
+
+## The single stateful channel
+
+The board exposes a single stateful channel (SPEC §7) over which all frame
+kinds are multiplexed by `frame_kind`. Keeping one channel keeps the board's
+observable surface minimal.
+
+## Capacity
+
+Capacity bounds for the channel are defined in SPEC §8. `TODO: confirm the
+capacity model and any limits against SPEC §8.`
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §1 (wire types), §7 (single stateful channel),
+  §8 (capacity); core/wire, core/schemas, core/protocol, core/canonical,
+  core/sign. TODO: confirm frame fields and the state machine against the repo
+  (see OPEN-QUESTIONS.md).
+</div>

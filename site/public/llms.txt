@@ -1,0 +1,21 @@
+# ORP
+
+> ORP is a device-first messaging protocol whose rendezvous server is structurally unable to read message contents, keys, or unsealed signaling. An enforced invariant, not a logging policy.
+
+- [Home](https://orp.dev/): the landing page and project summary.
+- [Comparison](https://orp.dev/compare/): blind rendezvous vs trusted signaling servers.
+
+## Docs
+
+- [What ORP is](https://orp.dev/docs/overview/): ORP brokers a meeting between two devices that share one key bound to one target, while the server stays structurally unable to read what they exchange.
+- [Quickstart](https://orp.dev/docs/quickstart/): Install ORP, run the adversarial test suite, and start the in-process and real-transport demos in a few commands.
+- [Protocol reference](https://orp.dev/docs/protocol/): The presence, intent, and match frames, the frame_kind routing tag, the KEY/offer/answer phases, JSON Schemas, and canonical-JSON signing.
+- [The blindness invariant and collision analysis](https://orp.dev/docs/blindness/): How ORP's wire format makes the rendezvous server structurally blind, plus the collision analysis behind the one-key-one-target model.
+- [Cryptographic controls](https://orp.dev/docs/crypto/): The sealed-box control, the ICE transport policy, the static inner message layer, and the delivery acknowledgement layer that keep the board blind.
+- [Threat model](https://orp.dev/docs/threat-model/): "What ORP protects against a board adversary and a peer, plus the stated limits: no forward secrecy, a visible social graph, and replay bounds."
+- [Operating the board](https://orp.dev/docs/operating-the-board/): "Deploy the rendezvous board: environment variables, autoscaling, the freemem caveat, a TLS reverse proxy, and the AGPL network obligation."
+- [The production-transport gap](https://orp.dev/docs/transport-gap/): Production deployers must supply a WebSocket RendezvousBroker adapter, a real WebRTCEndpoint, and optionally TURN for relay-only operation.
+- [API reference](https://orp.dev/docs/api/): "The public surface of the ORP core modules: identity, wire, protocol, sealedbox, schemas, delivery layer, propagation, and more."
+- [Identity rotation (ORP-004)](https://orp.dev/docs/identity-rotation/): How devices rotate identity keys without breaking existing rendezvous bindings, the migration path, and the constraints behind the design.
+- [Neighbor propagation (ORP-006)](https://orp.dev/docs/neighbor-propagation/): How presence and routing state propagate between neighboring board nodes while preserving the blindness invariant.
+- [Frequently asked questions](https://orp.dev/docs/faq/): "Straight answers: can the server read my messages, does ORP have forward secrecy, is the board really stateless, how does this differ from Signal."

@@ -1,0 +1,36 @@
+---
+title: Neighbor propagation (ORP-006)
+description: How presence and routing state propagate between neighboring board nodes while preserving the blindness invariant.
+---
+
+Neighbor propagation (decision ORP-006, SPEC §13) defines how presence and
+routing state moves between neighboring board nodes, so that a rendezvous can
+complete even when the two parties reach different nodes.
+
+## The problem propagation solves
+
+A single board node only knows about the parties connected to it. If two
+parties that share a key land on different nodes, the rendezvous cannot
+complete unless the nodes share enough state to route between them. Neighbor
+propagation is that sharing.
+
+## How state propagates between neighbors
+
+Neighboring nodes propagate the routing state they need (opaque tags, not
+contents) so a frame can find its counterpart on another node. The
+`core/propagation` module implements this. `TODO: confirm the propagation
+mechanism, what is shared, and the topology assumptions against SPEC §13.`
+
+## Preserving blindness across nodes
+
+Propagation must not widen what any node can read. Only the opaque tags
+needed for routing cross between neighbors; sealed payloads stay sealed and
+contents stay unreadable, so adding nodes does not weaken the blindness
+invariant. `TODO: confirm that the propagated state is limited to opaque
+routing tags.`
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §13 (neighbor propagation, ORP-006);
+  core/propagation. TODO: confirm the mechanism and what state is shared
+  (see OPEN-QUESTIONS.md).
+</div>

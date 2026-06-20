@@ -1,0 +1,59 @@
+---
+title: Threat model
+description: "What ORP protects against a board adversary and a peer, plus the stated limits: no forward secrecy, a visible social graph, and replay bounds."
+---
+
+ORP is honest about what it protects and what it does not. This page states
+the adversaries, the protections, and the documented limitations with the
+accepted trade-off for each.
+
+## Adversaries
+
+### The board adversary
+
+The board (the rendezvous server) is treated as untrusted. It can see opaque
+presence tags, the `frame_kind` routing tag, and sealed payloads, and it can
+observe that two endpoints rendezvous. It cannot read message contents, keys,
+or unsealed signaling. The whole design assumes the board may be hostile,
+compromised, or compelled, and the invariant must still hold.
+
+### The peer adversary
+
+The peer on the other side of a rendezvous is a different adversary. ORP
+binds one key to one target, so a peer's reach is limited to the targets it
+holds keys for. `TODO: confirm the peer-adversary protections against SPEC
+§9.`
+
+## What is protected
+
+- Message contents, private keys, and unsealed signaling are never readable
+  by the board.
+- A captured key opens one target, not a directory.
+
+## Documented limitations
+
+These are accepted trade-offs, stated plainly rather than hidden.
+
+### No forward secrecy
+
+The inner message layer is static (SPEC §9.3). It does not rekey per message,
+so a future key compromise can expose past sealed payloads. The trade-off is
+a simpler model; the cost is the absence of forward secrecy.
+
+### The social graph is visible
+
+The board can see that two endpoints meet (SPEC §9.4). It cannot read what
+they exchange, but the graph of who rendezvouses with whom is observable.
+ORP does not claim 100% anonymity, and you should not present it that way.
+
+### Replay and linkability
+
+Presence tags carry documented replay and linkability bounds (SPEC §9.5).
+Mitigations are scoped to those bounds rather than absolute. `TODO: confirm
+the exact replay/linkability bounds and mitigations against SPEC §9.5.`
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §9 (adversaries and limitations), §9.3 (forward
+  secrecy), §9.4 (social graph), §9.5 (replay/linkability). TODO: confirm
+  section numbers and trade-off wording (see OPEN-QUESTIONS.md).
+</div>

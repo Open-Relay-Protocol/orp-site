@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-label="ORP">
+  <title>ORP</title>
+  <rect width="40" height="40" rx="8" fill="#0E1726"/>
+  <g transform="translate(20 20)">
+    <ellipse cx="0" cy="0" rx="15" ry="9" transform="rotate(-20)" fill="none" stroke="#2F74E6" stroke-width="2.4"/>
+    <g stroke="#ffffff" stroke-width="1.6" stroke-linecap="round">
+      <line x1="-6" y1="2" x2="5.5" y2="-2"/>
+      <line x1="-3.5" y1="-0.4" x2="-1.8" y2="1.6"/>
+      <line x1="-1" y1="-1.4" x2="0.7" y2="0.6"/>
+      <line x1="1.5" y1="-2.2" x2="3.2" y2="-0.2"/>
+    </g>
+  </g>
+</svg>

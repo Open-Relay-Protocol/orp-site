@@ -1,0 +1,76 @@
+---
+title: Blind rendezvous vs trusted signaling servers
+description: Why a conventional signaling server still sees your metadata, and how a structurally blind rendezvous broker removes that trust from the path.
+---
+
+Most private messaging puts a trusted server in the middle of the
+introduction. ORP removes the trust by making the rendezvous server
+structurally blind. This page frames the difference around the problem,
+metadata exposure at the signaling server, not around any product name.
+
+## The problem: the signaling server sees the introduction
+
+To connect two devices peer to peer (for example with WebRTC), something has
+to broker the introduction: exchange the SDP, the ICE candidates, and often
+the keys. That broker is the signaling server. Even when the media is
+end-to-end encrypted, the signaling server typically sees:
+
+- who is connecting to whom (the social graph),
+- the SDP and ICE candidates (network-level metadata), and
+- in many designs, the key material exchanged through it.
+
+End-to-end encryption of the call does not cover the rendezvous. The
+metadata lives at the signaling server.
+
+## The conventional model: trust is a policy
+
+A conventional trusted signaling server can read the signaling. It promises
+not to retain it. That promise is operational policy:
+
+- it can be changed without notice,
+- it can be compelled by a third party, and
+- it cannot be verified from the outside.
+
+You are trusting the operator, and you have no way to check that the trust is
+warranted.
+
+## The ORP model: blindness is an invariant
+
+ORP makes the rendezvous server structurally unable to read contents, keys,
+or unsealed signaling. There is no frame shape on the wire that carries
+plaintext the board could read, so the property holds even if the operator is
+hostile, compromised, or compelled. It is enforced by the
+[wire format](/docs/protocol/) and checked by an
+[adversarial test suite](/docs/quickstart/).
+
+| | Trusted signaling server | ORP blind board |
+| --- | --- | --- |
+| Reads SDP / ICE | Yes | No, sealed |
+| Reads keys | Often | No |
+| Sees social graph | Yes | Yes |
+| Guarantee type | Policy (no-log promise) | Invariant (wire format) |
+| Externally verifiable | No | Yes, via the test suite |
+
+## Versus relay-based messengers
+
+Relay-based messengers route messages through servers that, even when content
+is end-to-end encrypted, sit on the metadata path. ORP is narrower and more
+honest about scope: it is rendezvous and signaling infrastructure that keeps
+the broker blind. It does not try to hide the social graph, and it does not
+provide forward secrecy. See the [threat model](/docs/threat-model/) for the
+full set of trade-offs.
+
+## Where ORP does not help
+
+To stay honest:
+
+- The social graph (that two endpoints meet) is visible. ORP is not full
+  anonymity.
+- There is no forward secrecy; a key compromise can expose past payloads.
+- ORP is infrastructure, not a complete messenger application.
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §1 (invariant and wire types), §9 (threat model
+  and limitations); README. TODO: confirm claims against the repo
+  (see OPEN-QUESTIONS.md).
+</div>

@@ -1,0 +1,40 @@
+---
+title: The production-transport gap
+description: Production deployers must supply a WebSocket RendezvousBroker adapter, a real WebRTCEndpoint, and optionally TURN for relay-only operation.
+---
+
+The reference implementation ships with in-process transport stand-ins so the
+protocol can be demonstrated and tested end to end. To run ORP in production,
+a deployer supplies the real transport. This page lists what that means.
+
+## What the reference ships vs what you supply
+
+The reference provides the protocol logic and demo transports. It does not
+ship a production network stack. The gap a deployer fills is the transport
+layer (SPEC §10): a real signaling broker, a real WebRTC endpoint, and
+optionally a TURN server.
+
+## The WebSocket RendezvousBroker adapter
+
+You supply a `RendezvousBroker` adapter that carries ORP frames over a real
+network, typically WebSocket. This is the production stand-in for the
+in-process broker used in the demo. `TODO: confirm the RendezvousBroker
+interface shape against the repo.`
+
+## A real WebRTCEndpoint
+
+You supply a real `WebRTCEndpoint` that performs the actual WebRTC offer and
+answer using the sealed signaling ORP relays. `TODO: confirm the
+WebRTCEndpoint interface shape against the repo.`
+
+## Optional TURN for relay-only
+
+For deployments that do not want peers to learn each other's network
+addresses, you can run a TURN server and operate relay-only, routing media
+through the relay. This ties into the [ICE policy](/docs/crypto/#control-b-the-ice-policy).
+
+<div class="orp-source">
+  <strong>Source:</strong> SPEC §10 (transport split), README (production
+  transport gap), core/ice (relay-only). TODO: confirm the adapter interface
+  names and shapes (see OPEN-QUESTIONS.md).
+</div>

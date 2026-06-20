@@ -16,10 +16,11 @@ permissions:
   pages: write
   id-token: write
 
-# One concurrent deploy at a time; let an in-progress run finish.
+# One deploy at a time. Cancel an in-progress run so a stuck or superseded
+# Pages deployment cannot block a newer one.
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:

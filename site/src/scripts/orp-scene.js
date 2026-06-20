@@ -20,7 +20,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
 const COLORS = {
-  bg: 0x0e1726,
+  bg: 0x0a0c18,
   cobalt: 0x2f74e6,
   cobaltDeep: 0x0e62cc,
   gold: 0xffcc66, // KEY

@@ -1,34 +1,38 @@
-/* ORP brand tokens. Dark slate base, cobalt accent, serif headings. */
+/* ORP brand tokens. Deep indigo-storm base, violet/teal neon accents,
+   serif headings. Palette drawn from the site's atmospheric artwork. */
 :root {
-  --orp-bg-dark: #0e1726;
-  --orp-primary: #0e62cc;
-  --orp-primary-bright: #2f74e6;
+  --orp-bg-dark: #0a0c18;
+  --orp-primary: #5b3fd6;
+  --orp-primary-bright: #9a7bff;
+  --orp-teal: #38e0d0;
+  --orp-violet: #9a7bff;
+  --orp-magenta: #c879f9;
   --orp-serif: Georgia, "Times New Roman", "Iowan Old Style", serif;
 }
 
-/* Starlight accent palette (cobalt). */
+/* Starlight accent palette (violet). */
 :root {
-  --sl-color-accent-low: #102a4d;
-  --sl-color-accent: #1f5fbf;
-  --sl-color-accent-high: #bcd4f5;
+  --sl-color-accent-low: #241d4d;
+  --sl-color-accent: #6b54d6;
+  --sl-color-accent-high: #d7d0ff;
 }
 
-/* Dark theme: slate grays tuned around BG_DARK. */
+/* Dark theme: indigo grays tuned around BG_DARK. */
 :root[data-theme="dark"] {
-  --sl-color-accent-low: #0f284a;
-  --sl-color-accent: #2f74e6;
-  --sl-color-accent-high: #cfe0fb;
-  --sl-color-white: #f4f7fc;
-  --sl-color-gray-1: #e3e9f2;
-  --sl-color-gray-2: #c2cad8;
-  --sl-color-gray-3: #8f9bb0;
-  --sl-color-gray-4: #5b6678;
-  --sl-color-gray-5: #2a3548;
-  --sl-color-gray-6: #18243a;
-  --sl-color-black: #0e1726;
-  --sl-color-bg: #0e1726;
-  --sl-color-bg-nav: #0c1422;
-  --sl-color-bg-sidebar: #0c1422;
+  --sl-color-accent-low: #1d1a40;
+  --sl-color-accent: #9a7bff;
+  --sl-color-accent-high: #ddd6ff;
+  --sl-color-white: #f5f4fc;
+  --sl-color-gray-1: #e5e3f2;
+  --sl-color-gray-2: #c5c2d8;
+  --sl-color-gray-3: #918fb0;
+  --sl-color-gray-4: #5d5a78;
+  --sl-color-gray-5: #2c2a48;
+  --sl-color-gray-6: #1a1830;
+  --sl-color-black: #0a0c18;
+  --sl-color-bg: #0a0c18;
+  --sl-color-bg-nav: #0b0c1a;
+  --sl-color-bg-sidebar: #0b0c1a;
 }
 
 /* Serif headings paired with the default clean sans body. */

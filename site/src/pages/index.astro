@@ -853,6 +853,34 @@ const jsonLd = [
         .site-footer nav a {
           margin: 0 1.25rem 0 0;
         }
+
+        /* Scene: give the canvas more vertical room and make the HUD compact
+           so the controls don't crowd the 3D view on small screens. */
+        .scene-canvas {
+          height: clamp(320px, 64vh, 460px);
+        }
+        .scene-hud {
+          padding: 0.7rem 0.8rem 0.85rem;
+          gap: 0.5rem;
+        }
+        .phase-track {
+          gap: 0.3rem;
+        }
+        .phase-chip {
+          font-size: 0.68rem;
+          padding: 0.25rem 0.6rem;
+        }
+        .phase-caption {
+          font-size: 0.82rem;
+          min-height: 3.6em;
+        }
+        .board-toggle {
+          font-size: 0.8rem;
+          padding: 0.45rem 0.8rem;
+        }
+        .scene-head {
+          margin-bottom: 1rem;
+        }
       }
       @media (prefers-reduced-motion: reduce) {
         :global(html) {

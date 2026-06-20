@@ -78,6 +78,10 @@ const PHASES = [
   },
 ];
 
+// Sprite world-size multiplier. Bumped on mobile, where the camera sits
+// further back (to fit the scene), so labels stay legible.
+let labelBoost = 1;
+
 function makeLabelSprite(text, { color = "#e3e9f2", scale = 1 } = {}) {
   const pad = 24;
   const font = 600 + "";
@@ -112,7 +116,7 @@ function makeLabelSprite(text, { color = "#e3e9f2", scale = 1 } = {}) {
     depthWrite: false,
   });
   const sprite = new THREE.Sprite(mat);
-  const s = 0.0042 * scale;
+  const s = 0.0042 * scale * labelBoost;
   sprite.scale.set(w * s, h * s, 1);
   sprite.userData.dispose = () => {
     tex.dispose();
@@ -136,6 +140,16 @@ export function initOrpScene(container, hud = {}) {
     "(prefers-reduced-motion: reduce)",
   ).matches;
 
+  // Mobile / low-power detection. Coarse pointers and small viewports get a
+  // lighter pipeline (no bloom, capped pixel ratio) and bigger labels.
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const isMobile = coarse || window.innerWidth < 768;
+  const lowPower =
+    isMobile ||
+    (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+    (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+  labelBoost = isMobile ? 1.6 : 1;
+
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(COLORS.bg, 16, 34);
 
@@ -157,24 +171,28 @@ export function initOrpScene(container, hud = {}) {
   } catch (e) {
     return null; // caller keeps the SVG fallback visible
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower ? 1.5 : 2));
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   container.appendChild(renderer.domElement);
   renderer.domElement.style.display = "block";
+  // Let vertical swipes scroll the page; only horizontal drags orbit. Without
+  // this the canvas would trap touch scrolling on mobile.
+  renderer.domElement.style.touchAction = "pan-y";
   renderer.domElement.setAttribute("aria-hidden", "true");
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.enablePan = false;
+  controls.enableZoom = !isMobile; // avoid hijacking pinch-to-zoom on phones
   controls.minDistance = 9;
-  controls.maxDistance = 20;
+  controls.maxDistance = 34;
   controls.minPolarAngle = Math.PI * 0.18;
   controls.maxPolarAngle = Math.PI * 0.62;
   controls.autoRotate = !reduceMotion;
   controls.autoRotateSpeed = 0.45;
-  controls.target.set(0, 0.4, 0);
+  controls.target.set(0, -0.2, 0);
 
   // Lighting
   scene.add(new THREE.AmbientLight(0x6f86b8, 0.9));
@@ -508,23 +526,27 @@ export function initOrpScene(container, hud = {}) {
   }
 
   // ---- Postprocessing (bloom) ------------------------------------------
+  // Skipped on low-power / mobile devices, where bloom is the heaviest cost.
+  // Emissive materials still read as glowing without it.
   let composer = null;
   let bloomOK = true;
-  try {
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(
-      new THREE.Vector2(container.clientWidth, container.clientHeight),
-      0.85, // strength
-      0.6, // radius
-      0.2, // threshold
-    );
-    composer.addPass(bloom);
-    composer.setSize(container.clientWidth, container.clientHeight);
-    composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  } catch (e) {
-    bloomOK = false;
-    composer = null;
+  if (!lowPower) {
+    try {
+      composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      const bloom = new UnrealBloomPass(
+        new THREE.Vector2(container.clientWidth, container.clientHeight),
+        0.85, // strength
+        0.6, // radius
+        0.2, // threshold
+      );
+      composer.addPass(bloom);
+      composer.setSize(container.clientWidth, container.clientHeight);
+      composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    } catch (e) {
+      bloomOK = false;
+      composer = null;
+    }
   }
 
   // ---- Animation loop ---------------------------------------------------
@@ -599,7 +621,36 @@ export function initOrpScene(container, hud = {}) {
     else renderer.render(scene, camera);
   }
 
+  // ---- Responsive camera framing ---------------------------------------
+  // Pull the camera back far enough that the full width (both devices + their
+  // labels) fits for the current aspect ratio. Narrow/portrait screens need a
+  // greater distance, which is what made the scene feel cropped on phones.
+  function frameCamera() {
+    const vFov = (camera.fov * Math.PI) / 180;
+    const tanV = Math.tan(vFov / 2);
+    const halfW = 8.2; // world half-width to keep visible
+    const halfH = 3.6; // world half-height to keep visible
+    const distW = halfW / (tanV * Math.max(0.0001, camera.aspect));
+    const distH = halfH / tanV;
+    const dist = Math.max(distW, distH, 11);
+
+    const dir = camera.position.clone().sub(controls.target);
+    if (dir.lengthSq() < 1e-4) dir.set(0, 4.2, 13.5);
+    dir.normalize().multiplyScalar(dist);
+    camera.position.copy(controls.target).add(dir);
+
+    controls.minDistance = dist * 0.7;
+    controls.maxDistance = dist * 1.7;
+    // Keep depth fog proportional to viewing distance so it never swallows the
+    // scene when the camera sits far back on mobile.
+    scene.fog.near = dist * 0.65;
+    scene.fog.far = dist + 24;
+    camera.updateProjectionMatrix();
+    controls.update();
+  }
+
   // ---- Resize / lifecycle ----------------------------------------------
+  let framedWidth = 0;
   function resize() {
     const w = container.clientWidth;
     const h = container.clientHeight;
@@ -607,6 +658,12 @@ export function initOrpScene(container, hud = {}) {
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
     composer?.setSize(w, h);
+    // Only re-frame on meaningful width changes — avoids jitter from the
+    // mobile URL bar showing/hiding (which only changes height).
+    if (Math.abs(w - framedWidth) > 24) {
+      framedWidth = w;
+      frameCamera();
+    }
   }
   const ro = new ResizeObserver(resize);
   ro.observe(container);
@@ -641,6 +698,8 @@ export function initOrpScene(container, hud = {}) {
   document.addEventListener("visibilitychange", onVisibility);
 
   // kick off
+  framedWidth = container.clientWidth;
+  frameCamera();
   applyPhase(0);
   frame();
 

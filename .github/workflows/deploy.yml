@@ -48,9 +48,13 @@ jobs:
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
-        # Pages must be enabled once in Settings, Pages, Source: GitHub Actions.
-        # The workflow token can deploy to Pages but cannot create the Pages
-        # site, so auto-enablement is not used.
+        with:
+          # Switch the Pages build source to "GitHub Actions" so this workflow
+          # is authoritative. Without it, a Pages site left on "Deploy from a
+          # branch" makes GitHub run its built-in Jekyll workflow against the
+          # repo root and serve README.md as the homepage, shadowing this
+          # Astro build. enablement updates the existing Pages site's source.
+          enablement: true
 
       - name: Build
         env:

@@ -1,0 +1,56 @@
+/* ORP brand tokens. Dark slate base, cobalt accent, serif headings. */
+:root {
+  --orp-bg-dark: #0e1726;
+  --orp-primary: #0e62cc;
+  --orp-primary-bright: #2f74e6;
+  --orp-serif: Georgia, "Times New Roman", "Iowan Old Style", serif;
+}
+
+/* Starlight accent palette (cobalt). */
+:root {
+  --sl-color-accent-low: #102a4d;
+  --sl-color-accent: #1f5fbf;
+  --sl-color-accent-high: #bcd4f5;
+}
+
+/* Dark theme: slate grays tuned around BG_DARK. */
+:root[data-theme="dark"] {
+  --sl-color-accent-low: #0f284a;
+  --sl-color-accent: #2f74e6;
+  --sl-color-accent-high: #cfe0fb;
+  --sl-color-white: #f4f7fc;
+  --sl-color-gray-1: #e3e9f2;
+  --sl-color-gray-2: #c2cad8;
+  --sl-color-gray-3: #8f9bb0;
+  --sl-color-gray-4: #5b6678;
+  --sl-color-gray-5: #2a3548;
+  --sl-color-gray-6: #18243a;
+  --sl-color-black: #0e1726;
+  --sl-color-bg: #0e1726;
+  --sl-color-bg-nav: #0c1422;
+  --sl-color-bg-sidebar: #0c1422;
+}
+
+/* Serif headings paired with the default clean sans body. */
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.content-panel h1,
+h1#_top {
+  font-family: var(--orp-serif);
+  letter-spacing: 0.2px;
+}
+
+/* Source note block used at the foot of every reference page. */
+.orp-source {
+  margin-top: 2.5rem;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--sl-color-accent);
+  background: var(--sl-color-gray-6);
+  border-radius: 0 6px 6px 0;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-2);
+}
+.orp-source strong {
+  color: var(--sl-color-white);
+}

@@ -1,0 +1,47 @@
+---
+import Default from "@astrojs/starlight/components/Head.astro";
+
+// Starlight already emits canonical, title, description, og:title/type/url/
+// description/site_name and twitter:card. We add the social image and a
+// TechArticle JSON-LD block for every docs page. Page-specific JSON-LD (for
+// example FAQPage) is added per page via frontmatter `head`.
+const { entry } = Astro.locals.starlightRoute;
+const site = Astro.site ?? new URL("https://orp.dev");
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL("/og/orp-og.png", site).href;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: entry.data.title,
+  description: entry.data.description ?? undefined,
+  url: canonical,
+  inLanguage: "en",
+  isPartOf: { "@type": "WebSite", name: "ORP", url: site.href },
+  author: { "@type": "Organization", name: "Prograde Solutions" },
+  publisher: { "@type": "Organization", name: "Prograde Solutions" },
+};
+---
+
+<Default />
+
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta
+  property="og:image:alt"
+  content="ORP. The rendezvous server is structurally blind."
+/>
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:title" content={entry.data.title} />
+{
+  entry.data.description && (
+    <meta name="twitter:description" content={entry.data.description} />
+  )
+}
+
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify(jsonLd)}
+  is:inline
+/>

@@ -1,0 +1,694 @@
+# ORP, full reference
+
+Source: https://orp.dev
+
+ORP is a device-first messaging protocol whose rendezvous server is structurally unable to read message contents, keys, or unsealed signaling. An enforced invariant, not a logging policy.
+
+Note: this site was authored from a build handoff brief. Protocol claims are provisional until verified against the upstream SPEC and core sources.
+
+
+
+=====================================================
+# What ORP is
+URL: https://orp.dev/docs/overview/
+
+ORP is a device-first messaging protocol whose rendezvous server is
+structurally unable to read message contents, keys, or unsealed signaling.
+The server brokers a meeting between two devices that already share one key
+bound to one target, and that blindness is an enforced invariant of the wire
+format, not a logging policy the operator promises to follow.
+
+## The one-key-one-target model
+
+ORP binds a shared key to a single rendezvous target. Possessing the key
+lets exactly two parties meet at exactly one point, and nothing wider. There
+is no broadcast surface and no directory the board can mine: a key opens one
+door and only that door.
+
+## The blindness invariant in plain terms
+
+The board (the rendezvous server) never receives readable contents, private
+keys, or unsealed signaling. What crosses it is reduced to opaque presence
+and routing tags plus sealed payloads it cannot open. Because no frame shape
+carries plaintext the board could read, blindness does not depend on the
+operator choosing not to log. Remove the operator's good behavior from the
+model entirely and the property still holds.
+
+## What the board does and does not see
+
+- **Does see:** opaque presence tags, a routing tag (`frame_kind`) that lets
+  it forward frames, and sealed payloads it cannot open. It can therefore
+  observe that two endpoints rendezvous (the social graph, see the
+  [threat model](/docs/threat-model/)).
+- **Does not see:** message contents, private keys, or unsealed WebRTC
+  signaling (SDP and ICE).
+
+## Where to go next
+
+- [Quickstart](/docs/quickstart/): install, test, and run the demo.
+- [Protocol reference](/docs/protocol/): wire types and the KEY/offer/answer
+  phases.
+- [The blindness invariant](/docs/blindness/): the collision analysis behind
+  one key, one target.
+- [Threat model](/docs/threat-model/): adversaries, protections, and the
+  stated trade-offs.
+
+
+=====================================================
+# Quickstart
+URL: https://orp.dev/docs/quickstart/
+
+This page gets you from clone to a running demo. Commands are taken from the
+repository README.
+
+## Install
+
+```bash
+npm install
+```
+
+## Run the tests
+
+The adversarial suite attacks the blindness invariant directly. The handoff
+cites 146 tests, each annotated with what it proves.
+
+```bash
+npm test
+```
+
+Two scans in the suite are worth calling out:
+
+- a **board-view scan**, which asserts that what the board can observe is
+  limited to opaque tags and sealed payloads, and
+- a **dgram wire-byte scan**, which inspects raw datagram bytes to confirm no
+  plaintext contents, keys, or unsealed signaling leak onto the wire.
+
+## Run the demo (in-process)
+
+```bash
+npm run demo
+```
+
+## Run the demo against real transport
+
+```bash
+npm run demo:real
+```
+
+This exercises the protocol over real transport adapters rather than the
+in-process stand-ins. See the [production-transport gap](/docs/transport-gap/)
+for what a deployer must supply.
+
+## Type-check
+
+```bash
+npm run typecheck
+```
+
+
+=====================================================
+# Protocol reference
+URL: https://orp.dev/docs/protocol/
+
+This page describes the ORP wire format and the connection state machine. It
+mirrors the wire types in the spec and the encoders in `core/wire`,
+`core/schemas`, and `core/protocol`.
+
+## Wire frame types
+
+ORP frames cross the board as opaque tags plus sealed payloads. There are
+three frame types.
+
+### Presence frame
+
+Announces that a party is present at a rendezvous target, expressed as an
+opaque tag. The board can route on the tag but learns nothing about who is
+present beyond the tag itself.
+
+### Intent frame
+
+Signals intent to connect for a matched target, moving a pair from "both
+present" toward an active exchange.
+
+### Match frame
+
+Carries the matched-pair signaling exchange across the board. The signaling
+payload (the WebRTC offer and answer) is sealed, so the board forwards it
+without reading it.
+
+## The frame_kind routing tag
+
+Every frame carries a `frame_kind` routing tag. This is what lets the board
+route frames on the single stateful channel without opening payloads: it
+reads the tag, not the contents.
+
+## The KEY / offer / answer phases
+
+A rendezvous proceeds through three phases:
+
+1. **KEY** establishes or confirms the shared key bound to the target.
+2. **Offer** carries the initiating peer's sealed WebRTC offer.
+3. **Answer** carries the responding peer's sealed WebRTC answer.
+
+The offer and answer payloads are SDP and ICE signaling, sealed so the board
+relays them blind. See [cryptographic controls](/docs/crypto/) for the
+sealing.
+
+## JSON Schemas
+
+The frame and payload shapes are defined as JSON Schemas in `core/schemas`,
+which the wire layer validates against. `TODO: enumerate the schema names and
+required fields against core/schemas.`
+
+## Canonical-JSON signing
+
+Signatures are computed over a canonical JSON serialization so that the bytes
+signed are stable and reproducible across implementations. `core/canonical`
+produces the canonical form and `core/sign` produces detached signatures over
+it.
+
+## The single stateful channel
+
+The board exposes a single stateful channel (SPEC §7) over which all frame
+kinds are multiplexed by `frame_kind`. Keeping one channel keeps the board's
+observable surface minimal.
+
+## Capacity
+
+Capacity bounds for the channel are defined in SPEC §8. `TODO: confirm the
+capacity model and any limits against SPEC §8.`
+
+
+=====================================================
+# The blindness invariant and collision analysis
+URL: https://orp.dev/docs/blindness/
+
+ORP's central property is that the rendezvous server is structurally blind:
+it cannot read message contents, keys, or unsealed signaling, and that holds
+as a property of the wire format rather than a promise from the operator.
+
+## What "structurally blind" means
+
+Structural blindness means there is no frame shape on the wire that carries
+plaintext the board could read. Contrast that with a logging policy, where a
+server is technically able to read traffic and merely declines to store it.
+With ORP you do not have to trust the decline: the readable data never
+reaches the board in the first place.
+
+## The collision table
+
+The README presents a collision analysis tying each observable on the board
+to what it could and could not reveal. The structure of that table is:
+
+| Board observable | What it could reveal | Why it does not |
+| --- | --- | --- |
+| Presence tag | That some party is present at a target | The tag is opaque; it does not name the party. |
+| `frame_kind` tag | Which phase a frame belongs to | It is a routing label, not contents. |
+| Sealed payload | The offer/answer signaling | Sealed to the board; only the paired peer can open it. |
+| Pairing of endpoints | That two endpoints rendezvous | This is the visible social graph; ORP does not hide it. |
+
+`TODO: reproduce the exact rows and figures from the README collision table.`
+
+## Why one key maps to one target
+
+A shared key is bound to a single rendezvous target. That binding is what
+makes the collision analysis tractable: a key cannot be used to fan out
+across many targets or to enumerate a directory, so the board cannot turn one
+captured key into a wide view. One key opens one door.
+
+## Invariant vs policy
+
+The distinction the whole project rests on:
+
+- A **policy** ("we do not log") is an operational choice that can be changed,
+  compelled, or broken without any visible change to the wire.
+- An **invariant** ("the board cannot read this") is enforced by the format
+  and is testable from the outside, which is what the
+  [adversarial test suite](/docs/quickstart/) does.
+
+
+=====================================================
+# Cryptographic controls
+URL: https://orp.dev/docs/crypto/
+
+The blindness invariant is upheld by a small set of cryptographic controls.
+Each one removes a category of readable data from the board's view.
+
+## Control a: the sealed box
+
+The signaling payloads (the WebRTC offer and answer) are wrapped in a sealed
+box so that only the intended paired peer can open them. The board forwards
+the sealed bytes without the ability to decrypt them. This is what keeps the
+SDP and ICE out of the board's reach during the offer/answer phases.
+
+Implemented in `core/sealedbox`.
+
+## Control b: the ICE policy
+
+ICE candidate handling follows a transport policy that governs how
+connectivity is established without leaking more than necessary to the board.
+Relay-only operation (forcing traffic through TURN) is available when a
+deployer wants to avoid exposing peer addresses to each other; see the
+[production-transport gap](/docs/transport-gap/).
+
+Implemented in `core/ice`. `TODO: confirm the exact ICE policy options.`
+
+## The static inner message layer
+
+Inside the sealed channel sits a static inner message layer that carries the
+application messages. It is static, meaning it does not rekey per message,
+which is the design choice behind the absence of forward secrecy
+(see [no forward secrecy](/docs/threat-model/#no-forward-secrecy)).
+
+Implemented in `core/messagelayer`.
+
+## The delivery acknowledgement layer
+
+A delivery acknowledgement layer (SPEC §11) provides delivery confirmation on
+top of the message layer. `TODO: confirm the ACK semantics and ordering
+guarantees against SPEC §11 and core/deliverylayer.`
+
+Implemented in `core/deliverylayer`.
+
+
+=====================================================
+# Threat model
+URL: https://orp.dev/docs/threat-model/
+
+ORP is honest about what it protects and what it does not. This page states
+the adversaries, the protections, and the documented limitations with the
+accepted trade-off for each.
+
+## Adversaries
+
+### The board adversary
+
+The board (the rendezvous server) is treated as untrusted. It can see opaque
+presence tags, the `frame_kind` routing tag, and sealed payloads, and it can
+observe that two endpoints rendezvous. It cannot read message contents, keys,
+or unsealed signaling. The whole design assumes the board may be hostile,
+compromised, or compelled, and the invariant must still hold.
+
+### The peer adversary
+
+The peer on the other side of a rendezvous is a different adversary. ORP
+binds one key to one target, so a peer's reach is limited to the targets it
+holds keys for. `TODO: confirm the peer-adversary protections against SPEC
+§9.`
+
+## What is protected
+
+- Message contents, private keys, and unsealed signaling are never readable
+  by the board.
+- A captured key opens one target, not a directory.
+
+## Documented limitations
+
+These are accepted trade-offs, stated plainly rather than hidden.
+
+### No forward secrecy
+
+The inner message layer is static (SPEC §9.3). It does not rekey per message,
+so a future key compromise can expose past sealed payloads. The trade-off is
+a simpler model; the cost is the absence of forward secrecy.
+
+### The social graph is visible
+
+The board can see that two endpoints meet (SPEC §9.4). It cannot read what
+they exchange, but the graph of who rendezvouses with whom is observable.
+ORP does not claim 100% anonymity, and you should not present it that way.
+
+### Replay and linkability
+
+Presence tags carry documented replay and linkability bounds (SPEC §9.5).
+Mitigations are scoped to those bounds rather than absolute. `TODO: confirm
+the exact replay/linkability bounds and mitigations against SPEC §9.5.`
+
+
+=====================================================
+# Operating the board
+URL: https://orp.dev/docs/operating-the-board/
+
+This page covers running the rendezvous board in production. It follows the
+deployment recipe in the README.
+
+## Deployment recipe
+
+The board is the rendezvous server: it routes opaque tags and forwards sealed
+payloads. Because of the blindness invariant, an operator who runs the board
+still cannot read user traffic. `TODO: reproduce the exact deployment recipe
+steps from the README.`
+
+## Environment variables
+
+The board is configured by environment variables.
+
+| Variable | Purpose |
+| --- | --- |
+| `TODO` | TODO: confirm the env var names, defaults, and required vs optional against the README and board/. |
+
+`TODO: fill this table from the board configuration.`
+
+## Autoscaling and the os.freemem() caveat
+
+When autoscaling the board, note the documented caveat that inside a
+container `os.freemem()` reports host memory, not the container's limit, so
+memory-based scaling signals can be misleading. Plan capacity accordingly.
+`TODO: confirm the exact caveat wording and recommended mitigation.`
+
+## TLS reverse proxy
+
+Terminate TLS at a reverse proxy in front of the board rather than in the
+board process itself. `TODO: confirm the recommended proxy configuration from
+the README.`
+
+## The AGPL network obligation
+
+The board is licensed under AGPL-3.0. Because the board is a network service,
+the AGPL network obligation (AGPL §13) applies: if you run a modified board
+and expose it over a network, you must offer users of that service the
+corresponding source of your modified version. The Apache-licensed core,
+client, spec, and tests do not carry this obligation; only the board does.
+
+See [licensing](/docs/overview/) and the repository `LICENSING.md`.
+
+
+=====================================================
+# The production-transport gap
+URL: https://orp.dev/docs/transport-gap/
+
+The reference implementation ships with in-process transport stand-ins so the
+protocol can be demonstrated and tested end to end. To run ORP in production,
+a deployer supplies the real transport. This page lists what that means.
+
+## What the reference ships vs what you supply
+
+The reference provides the protocol logic and demo transports. It does not
+ship a production network stack. The gap a deployer fills is the transport
+layer (SPEC §10): a real signaling broker, a real WebRTC endpoint, and
+optionally a TURN server.
+
+## The WebSocket RendezvousBroker adapter
+
+You supply a `RendezvousBroker` adapter that carries ORP frames over a real
+network, typically WebSocket. This is the production stand-in for the
+in-process broker used in the demo. `TODO: confirm the RendezvousBroker
+interface shape against the repo.`
+
+## A real WebRTCEndpoint
+
+You supply a real `WebRTCEndpoint` that performs the actual WebRTC offer and
+answer using the sealed signaling ORP relays. `TODO: confirm the
+WebRTCEndpoint interface shape against the repo.`
+
+## Optional TURN for relay-only
+
+For deployments that do not want peers to learn each other's network
+addresses, you can run a TURN server and operate relay-only, routing media
+through the relay. This ties into the [ICE policy](/docs/crypto/#control-b-the-ice-policy).
+
+
+=====================================================
+# API reference
+URL: https://orp.dev/docs/api/
+
+The ORP core is organized into focused modules. This page lists each module
+and its responsibility. Exact exported types and function signatures should
+be generated from the `core/` sources; they are tracked as TODO in
+`OPEN-QUESTIONS.md` until the source is available to introspect.
+
+Each module below links to its source on GitHub. Replace `Prograde-Solutions/orp`
+and confirm the file paths once the repository layout is verified.
+
+## identity
+
+Device identity keypairs and the identity-rotation primitives behind
+[ORP-004](/docs/identity-rotation/).
+
+Source: [`core/identity`](https://github.com/Prograde-Solutions/orp/blob/main/core/identity.ts)
+
+## canonical
+
+Canonical JSON serialization used as the stable input to signing and sealing.
+
+Source: [`core/canonical`](https://github.com/Prograde-Solutions/orp/blob/main/core/canonical.ts)
+
+## sign
+
+Detached signatures over canonical JSON.
+
+Source: [`core/sign`](https://github.com/Prograde-Solutions/orp/blob/main/core/sign.ts)
+
+## sealedbox
+
+Sealed-box encryption (control a): payloads the board cannot open.
+
+Source: [`core/sealedbox`](https://github.com/Prograde-Solutions/orp/blob/main/core/sealedbox.ts)
+
+## ice
+
+ICE candidate handling and the ICE transport policy (control b).
+
+Source: [`core/ice`](https://github.com/Prograde-Solutions/orp/blob/main/core/ice.ts)
+
+## messagelayer
+
+The static inner message layer carried inside the sealed channel.
+
+Source: [`core/messagelayer`](https://github.com/Prograde-Solutions/orp/blob/main/core/messagelayer.ts)
+
+## schemas
+
+JSON Schemas for the wire frames and message payloads.
+
+Source: [`core/schemas`](https://github.com/Prograde-Solutions/orp/blob/main/core/schemas.ts)
+
+## wire
+
+Wire frame encode/decode, including the `frame_kind` routing tag.
+
+Source: [`core/wire`](https://github.com/Prograde-Solutions/orp/blob/main/core/wire.ts)
+
+## protocol
+
+The KEY/offer/answer state machine and rendezvous orchestration.
+
+Source: [`core/protocol`](https://github.com/Prograde-Solutions/orp/blob/main/core/protocol.ts)
+
+## deliverylayer
+
+The delivery acknowledgement layer (SPEC §11).
+
+Source: [`core/deliverylayer`](https://github.com/Prograde-Solutions/orp/blob/main/core/deliverylayer.ts)
+
+## migration
+
+Identity and state migration support, related to identity rotation.
+
+Source: [`core/migration`](https://github.com/Prograde-Solutions/orp/blob/main/core/migration.ts)
+
+## propagation
+
+Neighbor propagation between board nodes ([ORP-006](/docs/neighbor-propagation/)).
+
+Source: [`core/propagation`](https://github.com/Prograde-Solutions/orp/blob/main/core/propagation.ts)
+
+## clock
+
+The time source / clock abstraction used for ordering and expiry.
+
+Source: [`core/clock`](https://github.com/Prograde-Solutions/orp/blob/main/core/clock.ts)
+
+
+=====================================================
+# Identity rotation (ORP-004)
+URL: https://orp.dev/docs/identity-rotation/
+
+Identity rotation (decision ORP-004, SPEC §12) lets a device change its
+identity keys over time without tearing down the rendezvous bindings it
+already holds.
+
+## Why rotation
+
+Long-lived identity keys are a liability: the longer a key lives, the more
+exposure a compromise carries. Rotation lets a device retire an old identity
+key and adopt a new one on a schedule or after a suspected compromise.
+
+## How a rotation works
+
+A rotation moves a device from an old identity key to a new one while
+preserving its ability to rendezvous at existing targets. The `core/identity`
+module provides the identity primitives and `core/migration` handles moving
+state across the rotation. `TODO: confirm the rotation procedure and message
+flow against SPEC §12 and core/identity / core/migration.`
+
+## What survives a rotation
+
+Existing rendezvous bindings survive, so a rotation does not force every peer
+to re-establish a key. `TODO: confirm exactly what state carries over.`
+
+## Constraints
+
+`TODO: confirm the constraints and any ordering or timing requirements on
+rotation against SPEC §12.`
+
+
+=====================================================
+# Neighbor propagation (ORP-006)
+URL: https://orp.dev/docs/neighbor-propagation/
+
+Neighbor propagation (decision ORP-006, SPEC §13) defines how presence and
+routing state moves between neighboring board nodes, so that a rendezvous can
+complete even when the two parties reach different nodes.
+
+## The problem propagation solves
+
+A single board node only knows about the parties connected to it. If two
+parties that share a key land on different nodes, the rendezvous cannot
+complete unless the nodes share enough state to route between them. Neighbor
+propagation is that sharing.
+
+## How state propagates between neighbors
+
+Neighboring nodes propagate the routing state they need (opaque tags, not
+contents) so a frame can find its counterpart on another node. The
+`core/propagation` module implements this. `TODO: confirm the propagation
+mechanism, what is shared, and the topology assumptions against SPEC §13.`
+
+## Preserving blindness across nodes
+
+Propagation must not widen what any node can read. Only the opaque tags
+needed for routing cross between neighbors; sealed payloads stay sealed and
+contents stay unreadable, so adding nodes does not weaken the blindness
+invariant. `TODO: confirm that the propagated state is limited to opaque
+routing tags.`
+
+
+=====================================================
+# Frequently asked questions
+URL: https://orp.dev/docs/faq/
+
+Short, direct answers. Each links to the page that expands it.
+
+## Can the server read my messages?
+
+No. The rendezvous server is structurally blind. Message contents, private
+keys, and unsealed signaling never reach it in readable form: it sees only
+opaque tags and sealed payloads it cannot open. This is enforced by the wire
+format, not by a logging policy. See
+[the blindness invariant](/docs/blindness/).
+
+## Does ORP have forward secrecy?
+
+No. The inner message layer is static and does not rekey per message, so a
+future key compromise can expose past sealed payloads. This is a stated
+trade-off. See [no forward secrecy](/docs/threat-model/#no-forward-secrecy).
+
+## Is the board really stateless?
+
+The board exposes a single stateful channel and holds only the routing state
+it needs to broker a meeting. It does not hold readable contents or keys.
+See [the single stateful channel](/docs/protocol/#the-single-stateful-channel).
+
+## How is this different from Signal's model?
+
+ORP targets the rendezvous and signaling layer. It makes the server
+structurally unable to read signaling, keys, or contents as an invariant of
+the wire format. It does not provide forward secrecy and it does not hide the
+social graph, and it says so. It is signaling infrastructure, not a full
+messenger. See the [comparison page](/compare/).
+
+## Can the server see who I talk to?
+
+The board can observe that two endpoints rendezvous, the visible social graph
+(SPEC §9.4). It cannot read what they exchange. ORP does not claim full
+anonymity. See [the social graph is visible](/docs/threat-model/#the-social-graph-is-visible).
+
+## What happens if a key is compromised?
+
+Because there is no forward secrecy, a compromised key can expose past sealed
+payloads encrypted under it. A key is bound to one target, so the exposure is
+scoped to that target, not a directory. [Identity rotation](/docs/identity-rotation/)
+limits how long an identity key lives.
+
+## Do I need to run TURN?
+
+Only if you want relay-only operation so peers do not learn each other's
+network addresses. TURN is optional. See
+[optional TURN for relay-only](/docs/transport-gap/#optional-turn-for-relay-only).
+
+## What do I have to build for production?
+
+A WebSocket `RendezvousBroker` adapter and a real `WebRTCEndpoint`, and
+optionally TURN. See [the production-transport gap](/docs/transport-gap/).
+
+
+=====================================================
+# Blind rendezvous vs trusted signaling servers
+URL: https://orp.dev/compare/
+
+Most private messaging puts a trusted server in the middle of the
+introduction. ORP removes the trust by making the rendezvous server
+structurally blind. This page frames the difference around the problem,
+metadata exposure at the signaling server, not around any product name.
+
+## The problem: the signaling server sees the introduction
+
+To connect two devices peer to peer (for example with WebRTC), something has
+to broker the introduction: exchange the SDP, the ICE candidates, and often
+the keys. That broker is the signaling server. Even when the media is
+end-to-end encrypted, the signaling server typically sees:
+
+- who is connecting to whom (the social graph),
+- the SDP and ICE candidates (network-level metadata), and
+- in many designs, the key material exchanged through it.
+
+End-to-end encryption of the call does not cover the rendezvous. The
+metadata lives at the signaling server.
+
+## The conventional model: trust is a policy
+
+A conventional trusted signaling server can read the signaling. It promises
+not to retain it. That promise is operational policy:
+
+- it can be changed without notice,
+- it can be compelled by a third party, and
+- it cannot be verified from the outside.
+
+You are trusting the operator, and you have no way to check that the trust is
+warranted.
+
+## The ORP model: blindness is an invariant
+
+ORP makes the rendezvous server structurally unable to read contents, keys,
+or unsealed signaling. There is no frame shape on the wire that carries
+plaintext the board could read, so the property holds even if the operator is
+hostile, compromised, or compelled. It is enforced by the
+[wire format](/docs/protocol/) and checked by an
+[adversarial test suite](/docs/quickstart/).
+
+| | Trusted signaling server | ORP blind board |
+| --- | --- | --- |
+| Reads SDP / ICE | Yes | No, sealed |
+| Reads keys | Often | No |
+| Sees social graph | Yes | Yes |
+| Guarantee type | Policy (no-log promise) | Invariant (wire format) |
+| Externally verifiable | No | Yes, via the test suite |
+
+## Versus relay-based messengers
+
+Relay-based messengers route messages through servers that, even when content
+is end-to-end encrypted, sit on the metadata path. ORP is narrower and more
+honest about scope: it is rendezvous and signaling infrastructure that keeps
+the broker blind. It does not try to hide the social graph, and it does not
+provide forward secrecy. See the [threat model](/docs/threat-model/) for the
+full set of trade-offs.
+
+## Where ORP does not help
+
+To stay honest:
+
+- The social graph (that two endpoints meet) is visible. ORP is not full
+  anonymity.
+- There is no forward secrecy; a key compromise can expose past payloads.
+- ORP is infrastructure, not a complete messenger application.

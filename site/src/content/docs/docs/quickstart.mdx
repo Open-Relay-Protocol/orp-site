@@ -1,0 +1,57 @@
+---
+title: Quickstart
+description: Install ORP, run the adversarial test suite, and start the in-process and real-transport demos in a few commands.
+---
+
+This page gets you from clone to a running demo. Commands are taken from the
+repository README.
+
+## Install
+
+```bash
+npm install
+```
+
+## Run the tests
+
+The adversarial suite attacks the blindness invariant directly. The handoff
+cites 146 tests, each annotated with what it proves.
+
+```bash
+npm test
+```
+
+Two scans in the suite are worth calling out:
+
+- a **board-view scan**, which asserts that what the board can observe is
+  limited to opaque tags and sealed payloads, and
+- a **dgram wire-byte scan**, which inspects raw datagram bytes to confirm no
+  plaintext contents, keys, or unsealed signaling leak onto the wire.
+
+## Run the demo (in-process)
+
+```bash
+npm run demo
+```
+
+## Run the demo against real transport
+
+```bash
+npm run demo:real
+```
+
+This exercises the protocol over real transport adapters rather than the
+in-process stand-ins. See the [production-transport gap](/docs/transport-gap/)
+for what a deployer must supply.
+
+## Type-check
+
+```bash
+npm run typecheck
+```
+
+<div class="orp-source">
+  <strong>Source:</strong> repository README (install, test, demo, demo:real,
+  typecheck), tests/ (the two scans). TODO: confirm exact script names and the
+  test count against package.json and README (see OPEN-QUESTIONS.md).
+</div>

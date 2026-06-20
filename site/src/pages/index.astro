@@ -1,0 +1,522 @@
+---
+import "../styles/custom.css";
+
+const GITHUB_URL = "https://github.com/Prograde-Solutions/orp";
+const site = Astro.site ?? new URL("https://orp.dev");
+const canonical = new URL("/", site).href;
+const ogImage = new URL("/og/orp-og.png", site).href;
+const title = "ORP: The structurally blind rendezvous server";
+const description =
+  "ORP is a device-first messaging protocol whose rendezvous server cannot read contents, keys, or signaling. An enforced invariant, not a logging policy.";
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name: "ORP",
+    description,
+    url: canonical,
+    codeRepository: GITHUB_URL,
+    programmingLanguage: "TypeScript",
+    author: { "@type": "Organization", name: "Prograde Solutions" },
+    license: "https://www.apache.org/licenses/LICENSE-2.0",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "ORP",
+    url: site.href,
+    description,
+  },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#0E1726" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="ORP" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="ORP. The rendezvous server is structurally blind."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link
+      rel="preload"
+      as="image"
+      href="/favicon.svg"
+      type="image/svg+xml"
+    />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(jsonLd)}
+      is:inline
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="ORP home">
+        <svg
+          class="brand-mark"
+          viewBox="0 0 168 40"
+          role="img"
+          aria-hidden="true"
+        >
+          <g transform="translate(20 20)">
+            <ellipse
+              cx="0"
+              cy="0"
+              rx="18"
+              ry="11"
+              transform="rotate(-20)"
+              fill="none"
+              stroke="#2F74E6"
+              stroke-width="2.4"></ellipse>
+            <g stroke="#ffffff" stroke-width="1.6" stroke-linecap="round">
+              <line x1="-7" y1="2.4" x2="6.5" y2="-2.4"></line>
+              <line x1="-4.5" y1="-0.6" x2="-2.5" y2="2"></line>
+              <line x1="-1.5" y1="-1.6" x2="0.5" y2="1"></line>
+              <line x1="1.5" y1="-2.6" x2="3.5" y2="0"></line>
+            </g>
+          </g>
+          <text
+            x="46"
+            y="28"
+            font-family="Georgia, serif"
+            font-size="26"
+            font-weight="700"
+            letter-spacing="1.5"
+            fill="#ffffff">ORP</text
+          >
+        </svg>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/docs/overview/">Docs</a>
+        <a href="/compare/">Why blind</a>
+        <a href={GITHUB_URL} rel="noopener">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <p class="eyebrow">Open Rendezvous Protocol</p>
+        <h1>The rendezvous server is structurally blind.</h1>
+        <p class="lede">
+          An enforced invariant, not a logging policy. ORP is a device-first
+          messaging protocol whose rendezvous server is structurally unable to
+          read message contents, keys, or unsealed signaling.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/docs/overview/">Read the docs</a>
+          <a class="btn btn-ghost" href={GITHUB_URL} rel="noopener"
+            >View on GitHub</a
+          >
+        </div>
+      </section>
+
+      <section class="problem" aria-labelledby="problem-h">
+        <h2 id="problem-h">Why signaling servers still see too much</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>The server still sees</h3>
+            <p>
+              A conventional signaling server reads the SDP, the keys exchanged
+              through it, and who is talking to whom. End-to-end encryption of
+              the call does not hide the rendezvous.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Trust is a policy</h3>
+            <p>
+              No-log promises are operational policy. They can be changed,
+              compelled, or quietly broken, and a user cannot tell from the
+              outside that they hold.
+            </p>
+          </article>
+          <article class="card">
+            <h3>You cannot verify</h3>
+            <p>
+              There is usually no way for a client to prove the server did not
+              retain metadata. The guarantee lives in the operator's conscience,
+              not in the wire format.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="diagram-section" aria-labelledby="diagram-h">
+        <h2 id="diagram-h">The blind broker</h2>
+        <p class="section-lede">
+          Two devices share one key bound to one rendezvous target. The board
+          routes opaque tags and forwards sealed payloads it cannot open.
+        </p>
+        <svg
+          class="diagram"
+          viewBox="0 0 720 240"
+          role="img"
+          aria-labelledby="diagram-title diagram-desc"
+        >
+          <title id="diagram-title">ORP blind broker data flow</title>
+          <desc id="diagram-desc"
+            >Device A and Device B each connect to the board. They send opaque
+            presence tags and sealed offer and answer payloads. The board routes
+            by tag but cannot read the sealed contents.</desc
+          >
+          <g fill="none" stroke="#2f74e6" stroke-width="2">
+            <rect x="20" y="90" width="150" height="60" rx="10"></rect>
+            <rect x="285" y="90" width="150" height="60" rx="10"></rect>
+            <rect x="550" y="90" width="150" height="60" rx="10"></rect>
+          </g>
+          <g
+            fill="#f4f7fc"
+            font-family="Georgia, serif"
+            font-size="18"
+            text-anchor="middle"
+          >
+            <text x="95" y="125">Device A</text>
+            <text x="360" y="118">Blind board</text>
+            <text x="625" y="125">Device B</text>
+          </g>
+          <g
+            fill="#8f9bb0"
+            font-family="-apple-system, sans-serif"
+            font-size="12"
+            text-anchor="middle"
+          >
+            <text x="360" y="138">routes opaque tags</text>
+            <text x="227" y="80">sealed offer</text>
+            <text x="493" y="80">sealed answer</text>
+          </g>
+          <g stroke="#5b6678" stroke-width="2" marker-end="url(#arrow)">
+            <line x1="170" y1="120" x2="283" y2="120"></line>
+            <line x1="435" y1="120" x2="548" y2="120"></line>
+          </g>
+          <defs>
+            <marker
+              id="arrow"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto-start-reverse"
+            >
+              <path d="M0,0 L10,5 L0,10 z" fill="#5b6678"></path>
+            </marker>
+          </defs>
+        </svg>
+      </section>
+
+      <section class="proof" aria-labelledby="proof-h">
+        <h2 id="proof-h">The proof is in the test suite</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>146 adversarial tests</h3>
+            <p>
+              The suite is written to attack the invariant, with a per-test note
+              of exactly what each one proves.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Board-view scan</h3>
+            <p>
+              Asserts that everything the board can observe is limited to opaque
+              tags and sealed payloads it cannot open.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Wire-byte scan</h3>
+            <p>
+              Inspects raw datagram bytes on the wire to confirm no plaintext
+              contents, keys, or unsealed signaling leak.
+            </p>
+          </article>
+        </div>
+        <p class="proof-note">
+          TODO: confirm the test count and scan names against the repo
+          (see OPEN-QUESTIONS.md).
+        </p>
+      </section>
+
+      <section class="tradeoffs" aria-labelledby="tradeoffs-h">
+        <h2 id="tradeoffs-h">Stated trade-offs, up front</h2>
+        <ul class="tradeoff-list">
+          <li>
+            <strong>No forward secrecy.</strong> The inner message layer is
+            static, so a key compromise can expose past sealed payloads.
+          </li>
+          <li>
+            <strong>The social graph is visible.</strong> The board can see that
+            two endpoints meet, even though it cannot read what they exchange.
+            This is not 100% anonymity, and we do not claim it.
+          </li>
+          <li>
+            <strong>Replay and linkability bounds.</strong> Presence tags carry
+            documented replay and linkability limits, with scoped mitigations
+            rather than absolute guarantees.
+          </li>
+        </ul>
+        <a class="inline-link" href="/docs/threat-model/"
+          >Read the full threat model →</a
+        >
+      </section>
+
+      <section class="final-cta" aria-labelledby="final-h">
+        <h2 id="final-h">Read the spec, run the tests, see for yourself.</h2>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/docs/overview/">Read the docs</a>
+          <a class="btn btn-ghost" href={GITHUB_URL} rel="noopener"
+            >View on GitHub</a
+          >
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        ORP, the Open Rendezvous Protocol. Core, client, spec, and tests under
+        Apache-2.0; the board under AGPL-3.0.
+      </p>
+      <nav aria-label="Footer">
+        <a href="/docs/overview/">Docs</a>
+        <a href="/docs/faq/">FAQ</a>
+        <a href={GITHUB_URL} rel="noopener">GitHub</a>
+      </nav>
+    </footer>
+
+    <style>
+      :global(html) {
+        scroll-behavior: smooth;
+      }
+      :global(body) {
+        margin: 0;
+        background: var(--orp-bg-dark);
+        color: #e3e9f2;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .skip-link {
+        position: absolute;
+        left: -999px;
+        top: 0;
+        background: #2f74e6;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        z-index: 10;
+      }
+      .skip-link:focus {
+        left: 0;
+      }
+      a {
+        color: #9cc1f5;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--orp-serif);
+        color: #f4f7fc;
+        line-height: 1.15;
+      }
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 1.25rem 1.5rem;
+      }
+      .brand-mark {
+        width: 132px;
+        height: 32px;
+        display: block;
+      }
+      .site-nav a {
+        color: #c2cad8;
+        text-decoration: none;
+        margin-left: 1.5rem;
+        font-size: 0.95rem;
+      }
+      .site-nav a:hover,
+      .site-nav a:focus {
+        color: #fff;
+      }
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+      .hero {
+        padding: 4.5rem 0 3.5rem;
+        max-width: 760px;
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 0.8rem;
+        color: #8fb4f2;
+        margin: 0 0 1rem;
+      }
+      .hero h1 {
+        font-size: clamp(2.4rem, 6vw, 4rem);
+        margin: 0 0 1.25rem;
+      }
+      .lede {
+        font-size: 1.25rem;
+        color: #c2cad8;
+        margin: 0 0 2rem;
+      }
+      .section-lede {
+        color: #c2cad8;
+        max-width: 640px;
+      }
+      .cta-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-block;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+      .btn-primary {
+        background: #2f74e6;
+        color: #fff;
+      }
+      .btn-primary:hover,
+      .btn-primary:focus {
+        background: #0e62cc;
+      }
+      .btn-ghost {
+        border: 1px solid #2a3548;
+        color: #e3e9f2;
+      }
+      .btn-ghost:hover,
+      .btn-ghost:focus {
+        border-color: #2f74e6;
+      }
+      section {
+        padding: 2.5rem 0;
+        border-top: 1px solid #18243a;
+      }
+      section h2 {
+        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        margin: 0 0 0.5rem;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+        margin-top: 1.75rem;
+      }
+      .card {
+        background: #0c1422;
+        border: 1px solid #18243a;
+        border-radius: 10px;
+        padding: 1.5rem;
+      }
+      .card h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1.2rem;
+        color: #2f74e6;
+      }
+      .card p {
+        margin: 0;
+        color: #c2cad8;
+        font-size: 0.97rem;
+      }
+      .diagram {
+        width: 100%;
+        max-width: 720px;
+        height: auto;
+        margin-top: 2rem;
+      }
+      .proof-note {
+        margin-top: 1.5rem;
+        font-size: 0.85rem;
+        color: #8f9bb0;
+      }
+      .tradeoff-list {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0;
+        display: grid;
+        gap: 1rem;
+        max-width: 760px;
+      }
+      .tradeoff-list li {
+        padding-left: 1.25rem;
+        border-left: 3px solid #2f74e6;
+        color: #c2cad8;
+      }
+      .tradeoff-list strong {
+        color: #f4f7fc;
+      }
+      .inline-link {
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .final-cta {
+        text-align: center;
+        padding: 4rem 0;
+      }
+      .final-cta .cta-row {
+        justify-content: center;
+        margin-top: 1.5rem;
+      }
+      .site-footer {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+        border-top: 1px solid #18243a;
+        color: #8f9bb0;
+        font-size: 0.9rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .site-footer nav a {
+        color: #c2cad8;
+        text-decoration: none;
+        margin-left: 1.25rem;
+      }
+      @media (max-width: 600px) {
+        .site-footer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .site-footer nav a {
+          margin: 0 1.25rem 0 0;
+        }
+      }
+    </style>
+  </body>
+</html>

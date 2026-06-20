@@ -18,6 +18,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+// Fat lines (Line2): plain THREE.Line ignores `linewidth` on WebGL, so the
+// key tether and the P2P channel use Line2 to render at a real, visible width.
+import { Line2 } from "three/addons/lines/Line2.js";
+import { LineGeometry } from "three/addons/lines/LineGeometry.js";
+import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 
 const COLORS = {
   bg: 0x0a0c18,
@@ -303,22 +308,35 @@ export function initOrpScene(container, hud = {}) {
   labelKind.position.set(0, 2.5, 0);
   scene.add(labelKind);
 
+  // Line2 materials need the drawing-buffer resolution to size their pixel
+  // width; collected here so resize() can keep them in sync.
+  const lineMaterials = [];
+  function flatPoints(curve, segments) {
+    const out = [];
+    for (const p of curve.getPoints(segments)) out.push(p.x, p.y, p.z);
+    return out;
+  }
+
   // The "one key, one target" tether between the two devices.
   const keyCurve = new THREE.QuadraticBezierCurve3(
     POS.A.clone().add(new THREE.Vector3(0, -0.2, 0)),
     new THREE.Vector3(0, -3.4, 0),
     POS.B.clone().add(new THREE.Vector3(0, -0.2, 0)),
   );
-  const keyLine = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints(keyCurve.getPoints(40)),
-    new THREE.LineDashedMaterial({
-      color: COLORS.gold,
-      transparent: true,
-      opacity: 0.4,
-      dashSize: 0.3,
-      gapSize: 0.22,
-    }),
-  );
+  const keyGeo = new LineGeometry();
+  keyGeo.setPositions(flatPoints(keyCurve, 40));
+  const keyMat = new LineMaterial({
+    color: COLORS.gold,
+    linewidth: 2.5, // device pixels; survives WebGL (unlike THREE.Line)
+    transparent: true,
+    opacity: 0.4,
+    dashed: true,
+    dashSize: 0.3,
+    gapSize: 0.22,
+  });
+  keyMat.resolution.set(container.clientWidth, container.clientHeight);
+  lineMaterials.push(keyMat);
+  const keyLine = new Line2(keyGeo, keyMat);
   keyLine.computeLineDistances();
   scene.add(keyLine);
   const keyLabel = makeLabelSprite("one key · one target", {
@@ -334,14 +352,17 @@ export function initOrpScene(container, hud = {}) {
     new THREE.Vector3(0, 3.6, -0.2),
     POS.B.clone().add(new THREE.Vector3(0, 0.2, 0)),
   );
-  const p2pLine = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints(p2pCurve.getPoints(50)),
-    new THREE.LineBasicMaterial({
-      color: COLORS.green,
-      transparent: true,
-      opacity: 0,
-    }),
-  );
+  const p2pGeo = new LineGeometry();
+  p2pGeo.setPositions(flatPoints(p2pCurve, 50));
+  const p2pMat = new LineMaterial({
+    color: COLORS.green,
+    linewidth: 3, // device pixels
+    transparent: true,
+    opacity: 0,
+  });
+  p2pMat.resolution.set(container.clientWidth, container.clientHeight);
+  lineMaterials.push(p2pMat);
+  const p2pLine = new Line2(p2pGeo, p2pMat);
   scene.add(p2pLine);
 
   // ---- Flow paths (device -> board -> device) ---------------------------
@@ -357,14 +378,15 @@ export function initOrpScene(container, hud = {}) {
   const curveAB = flowCurve(POS.A, POS.B, 1.7, 0.7);
   const curveBA = flowCurve(POS.B, POS.A, 1.7, -0.7);
 
-  // faint guide tubes for the two relay lanes
+  // guide tubes for the two relay lanes — thicker/brighter so the paths
+  // through the board read clearly in 3D space.
   for (const c of [curveAB, curveBA]) {
     const tube = new THREE.Mesh(
-      new THREE.TubeGeometry(c, 60, 0.02, 6, false),
+      new THREE.TubeGeometry(c, 60, 0.05, 8, false),
       new THREE.MeshBasicMaterial({
         color: COLORS.cobalt,
         transparent: true,
-        opacity: 0.12,
+        opacity: 0.22,
       }),
     );
     scene.add(tube);
@@ -658,6 +680,8 @@ export function initOrpScene(container, hud = {}) {
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
     composer?.setSize(w, h);
+    // Keep fat-line pixel widths correct after a resize.
+    for (const m of lineMaterials) m.resolution.set(w, h);
     // Only re-frame on meaningful width changes — avoids jitter from the
     // mobile URL bar showing/hiding (which only changes height).
     if (Math.abs(w - framedWidth) > 24) {

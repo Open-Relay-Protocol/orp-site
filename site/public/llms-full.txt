@@ -1,6 +1,6 @@
 # ORP, full reference
 
-Source: https://orp.dev
+Source: https://www.openrelayprotocol.com
 
 ORP is a device-first messaging protocol whose rendezvous server is structurally unable to read message contents, keys, or unsealed signaling. An enforced invariant, not a logging policy.
 
@@ -10,7 +10,7 @@ Note: this site was authored from a build handoff brief. Protocol claims are pro
 
 =====================================================
 # What ORP is
-URL: https://orp.dev/docs/overview/
+URL: https://www.openrelayprotocol.com/docs/overview/
 
 ORP is a device-first messaging protocol whose rendezvous server is
 structurally unable to read message contents, keys, or unsealed signaling.
@@ -56,7 +56,7 @@ model entirely and the property still holds.
 
 =====================================================
 # Quickstart
-URL: https://orp.dev/docs/quickstart/
+URL: https://www.openrelayprotocol.com/docs/quickstart/
 
 This page gets you from clone to a running demo. Commands are taken from the
 repository README.
@@ -108,7 +108,7 @@ npm run typecheck
 
 =====================================================
 # Protocol reference
-URL: https://orp.dev/docs/protocol/
+URL: https://www.openrelayprotocol.com/docs/protocol/
 
 This page describes the ORP wire format and the connection state machine. It
 mirrors the wire types in the spec and the encoders in `core/wire`,
@@ -181,7 +181,7 @@ capacity model and any limits against SPEC §8.`
 
 =====================================================
 # The blindness invariant and collision analysis
-URL: https://orp.dev/docs/blindness/
+URL: https://www.openrelayprotocol.com/docs/blindness/
 
 ORP's central property is that the rendezvous server is structurally blind:
 it cannot read message contents, keys, or unsealed signaling, and that holds
@@ -229,7 +229,7 @@ The distinction the whole project rests on:
 
 =====================================================
 # Cryptographic controls
-URL: https://orp.dev/docs/crypto/
+URL: https://www.openrelayprotocol.com/docs/crypto/
 
 The blindness invariant is upheld by a small set of cryptographic controls.
 Each one removes a category of readable data from the board's view.
@@ -273,7 +273,7 @@ Implemented in `core/deliverylayer`.
 
 =====================================================
 # Threat model
-URL: https://orp.dev/docs/threat-model/
+URL: https://www.openrelayprotocol.com/docs/threat-model/
 
 ORP is honest about what it protects and what it does not. This page states
 the adversaries, the protections, and the documented limitations with the
@@ -327,7 +327,7 @@ the exact replay/linkability bounds and mitigations against SPEC §9.5.`
 
 =====================================================
 # Operating the board
-URL: https://orp.dev/docs/operating-the-board/
+URL: https://www.openrelayprotocol.com/docs/operating-the-board/
 
 This page covers running the rendezvous board in production. It follows the
 deployment recipe in the README.
@@ -375,7 +375,7 @@ See [licensing](/docs/overview/) and the repository `LICENSING.md`.
 
 =====================================================
 # The production-transport gap
-URL: https://orp.dev/docs/transport-gap/
+URL: https://www.openrelayprotocol.com/docs/transport-gap/
 
 The reference implementation ships with in-process transport stand-ins so the
 protocol can be demonstrated and tested end to end. To run ORP in production,
@@ -410,7 +410,7 @@ through the relay. This ties into the [ICE policy](/docs/crypto/#control-b-the-i
 
 =====================================================
 # API reference
-URL: https://orp.dev/docs/api/
+URL: https://www.openrelayprotocol.com/docs/api/
 
 The ORP core is organized into focused modules. This page lists each module
 and its responsibility. Exact exported types and function signatures should
@@ -502,7 +502,7 @@ Source: [`core/clock`](https://github.com/Prograde-Solutions/orp/blob/main/core/
 
 =====================================================
 # Identity rotation (ORP-004)
-URL: https://orp.dev/docs/identity-rotation/
+URL: https://www.openrelayprotocol.com/docs/identity-rotation/
 
 Identity rotation (decision ORP-004, SPEC §12) lets a device change its
 identity keys over time without tearing down the rendezvous bindings it
@@ -535,7 +535,7 @@ rotation against SPEC §12.`
 
 =====================================================
 # Neighbor propagation (ORP-006)
-URL: https://orp.dev/docs/neighbor-propagation/
+URL: https://www.openrelayprotocol.com/docs/neighbor-propagation/
 
 Neighbor propagation (decision ORP-006, SPEC §13) defines how presence and
 routing state moves between neighboring board nodes, so that a rendezvous can
@@ -566,7 +566,7 @@ routing tags.`
 
 =====================================================
 # Frequently asked questions
-URL: https://orp.dev/docs/faq/
+URL: https://www.openrelayprotocol.com/docs/faq/
 
 Short, direct answers. Each links to the page that expands it.
 
@@ -625,7 +625,7 @@ optionally TURN. See [the production-transport gap](/docs/transport-gap/).
 
 =====================================================
 # Blind rendezvous vs trusted signaling servers
-URL: https://orp.dev/compare/
+URL: https://www.openrelayprotocol.com/compare/
 
 Most private messaging puts a trusted server in the middle of the
 introduction. ORP removes the trust by making the rendezvous server

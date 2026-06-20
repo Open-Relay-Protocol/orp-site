@@ -7,6 +7,8 @@
 //   BASE_PATH  the path the site is served under, e.g. / or /orp-site
 //
 // TODO: confirm the final DOMAIN (see OPEN-QUESTIONS.md). Placeholder until set.
+//
+// Pages is served via the GitHub Actions source (see .github/workflows/deploy.yml).
 
 function normalizeBase(b) {
   if (!b || b === "/") return "/";

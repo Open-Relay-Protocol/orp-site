@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: site/package-lock.json
 
@@ -47,6 +47,10 @@ jobs:
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
+        with:
+          # Enable Pages (GitHub Actions source) automatically on first run,
+          # so no manual Settings step is required.
+          enablement: true
 
       - name: Build
         env:

@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { SITE } from "../site.config.mjs";
+import { SITE, BASE } from "../site.config.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -44,7 +44,8 @@ function parse(file) {
   return { title, description, body };
 }
 
-const abs = (p) => new URL(p, SITE).href;
+const abs = (p) =>
+  new URL((BASE === "/" ? "" : BASE.replace(/\/$/, "")) + p, SITE).href;
 
 // llms.txt: concise index
 let index = `# ORP\n\n`;

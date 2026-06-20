@@ -9,6 +9,7 @@
 
 - [What ORP is](https://www.openrelayprotocol.com/docs/overview/): ORP brokers a meeting between two devices that share one key bound to one target, while the server stays structurally unable to read what they exchange.
 - [Quickstart](https://www.openrelayprotocol.com/docs/quickstart/): Install ORP, run the adversarial test suite, and start the in-process and real-transport demos in a few commands.
+- [ORP Technical White Paper](https://www.openrelayprotocol.com/docs/whitepaper/): The Open Relay Protocol white paper — design, cryptographic foundations, threat model, invariants, accepted limitations, and the adversarial test methodology that verifies them.
 - [Protocol reference](https://www.openrelayprotocol.com/docs/protocol/): The presence, intent, and match frames, the frame_kind routing tag, the KEY/offer/answer phases, JSON Schemas, and canonical-JSON signing.
 - [The blindness invariant and collision analysis](https://www.openrelayprotocol.com/docs/blindness/): How ORP's wire format makes the rendezvous server structurally blind, plus the collision analysis behind the one-key-one-target model.
 - [Cryptographic controls](https://www.openrelayprotocol.com/docs/crypto/): The sealed-box control, the ICE transport policy, the static inner message layer, and the delivery acknowledgement layer that keep the board blind.

@@ -38,6 +38,7 @@ export default defineConfig({
           items: [
             { label: "What ORP is", slug: "docs/overview" },
             { label: "Quickstart", slug: "docs/quickstart" },
+            { label: "White paper", slug: "docs/whitepaper" },
           ],
         },
         {

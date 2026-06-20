@@ -10,6 +10,7 @@ docs URLs sit under `/docs/` to keep them separate from the landing at `/`.
 | `/compare/` | Blind rendezvous vs trusted signaling servers | "metadata-free webrtc signaling", "p2p messaging without a trusted server" | comparison |
 | `/docs/overview/` | What ORP is | "what is open rendezvous protocol", "structurally blind server" | concept |
 | `/docs/quickstart/` | Quickstart | "orp install", "run orp demo" | reference |
+| `/docs/whitepaper/` | ORP Technical White Paper | "open relay protocol white paper", "blind signaling broker design" | reference |
 | `/docs/protocol/` | Protocol reference | "orp wire types", "rendezvous protocol frames" | reference |
 | `/docs/blindness/` | The blindness invariant and collision analysis | "blind broker collision", "structural blindness messaging" | concept |
 | `/docs/crypto/` | Cryptographic controls | "sealed box signaling", "webrtc sdp end-to-end encryption relay" | reference |

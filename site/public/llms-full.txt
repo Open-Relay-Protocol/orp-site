@@ -46,6 +46,8 @@ model entirely and the property still holds.
 ## Where to go next
 
 - [Quickstart](/docs/quickstart/): install, test, and run the demo.
+- [White paper](/docs/whitepaper/): the full protocol design, threat model, and
+  verification methodology in one document.
 - [Protocol reference](/docs/protocol/): wire types and the KEY/offer/answer
   phases.
 - [The blindness invariant](/docs/blindness/): the collision analysis behind
@@ -104,6 +106,462 @@ for what a deployer must supply.
 ```bash
 npm run typecheck
 ```
+
+
+=====================================================
+# ORP Technical White Paper
+URL: https://www.openrelayprotocol.com/docs/whitepaper/
+
+**Version 1.0 — June 2026** · Authors: Justin Avant, Ben Jammin · Reference
+implementation: [github.com/Prograde-Solutions/orp](https://github.com/Prograde-Solutions/orp)
+
+<Aside type="tip" title="Download">
+  Read offline or cite the original:
+  [download the white paper (Markdown)](/orp-whitepaper.md). To save a PDF, open
+  this page and use your browser's **Print → Save as PDF**.
+</Aside>
+
+## Abstract
+
+The Open Relay Protocol (ORP) is a device-first rendezvous messaging protocol
+in which two devices discover each other and bootstrap a peer-to-peer WebRTC
+connection through a blind bulletin board — a RAM-only WebRTC signaling broker
+that architecturally cannot access private keys, message plaintext, or
+unencrypted connection data. Unlike traditional messaging architectures where
+the server holds user data and the client trusts it, ORP inverts the trust
+model: the relay is untrusted by construction, and all confidentiality is
+enforced at the endpoints before any data reaches the relay.
+
+This paper describes the protocol's design, its cryptographic foundations, the
+specific threat model it addresses, the invariants it maintains, the
+limitations it deliberately accepts, and the adversarial test methodology that
+verifies these properties.
+
+## 1. Introduction
+
+### 1.1 The Problem
+
+Modern messaging systems rely on trusted servers. Signal, WhatsApp, and similar
+protocols encrypt message content end-to-end, but still depend on a centralized
+server infrastructure for user discovery, message routing, and store-and-forward
+delivery. The server knows who talks to whom, when, and how often. Users must
+trust that the server operator does not log, sell, or surrender this metadata.
+
+WebRTC was designed for peer-to-peer communication, but its signaling phase —
+the exchange of SDP offers/answers and ICE candidates needed to establish a
+direct connection — requires a broker. In practice, this broker becomes the
+trusted server that the peer-to-peer architecture was supposed to eliminate.
+
+### 1.2 The Approach
+
+ORP addresses this by making the signaling broker architecturally blind. Rather
+than trusting the broker to behave honestly, the protocol is designed so that
+the broker cannot access secrets even if fully compromised. This is achieved
+through two independent, non-substitutable confidentiality controls applied
+before any data reaches the broker:
+
+**Sealed signaling (Control a):** SDP offers, answers, and ICE candidates are
+encrypted to the recipient's X25519 transport key using an anonymous sealed box
+before reaching the broker. The broker relays ciphertext it cannot read.
+
+**ICE candidate policy (Control b):** Raw host IP addresses are stripped from
+ICE candidates before sealing, so the remote peer cannot learn the device's
+network location through the signaling data.
+
+These controls defend against two distinct adversaries — the broker (Adversary
+B) and the remote peer (Adversary P) — and neither control substitutes for the
+other.
+
+### 1.3 Design Principles
+
+- **Invariant-first design.** The top correctness requirement — "the board is
+  blind" — is stated before any other design choice. Every subsequent decision
+  is subordinate to it, and apparent conflicts are resolved in favor of
+  blindness and documented.
+- **Honest limitations.** Properties the protocol does not provide
+  (store-and-forward, forward secrecy at the message layer, social-graph
+  privacy) are documented as deliberate, closed decisions with explicit
+  reasoning, not as open TODOs.
+- **Adversarial verification.** The test suite models a full-log adversary with
+  access to every byte the broker sees and proves that no secret is
+  recoverable.
+
+## 2. Threat Model
+
+### 2.1 Adversary B — The Board
+
+The board (relay server) is modeled as honest-but-curious or fully compromised.
+It sees every byte routed through it. An attacker who compromises the board
+gains access to all traffic that transits it.
+
+**Defended by:** Control (a) — sealing SDP/ICE to the recipient's transport key
+before it reaches the board.
+
+**What the board legitimately sees:** Public identity keys (Ed25519), routing
+metadata (`boards_scope`, `session_nonce`, `timestamp`), match coordination
+(`match_id`, `frame_kind`). These are public routing metadata, not secrets.
+
+**What the board cannot see:** Private keys, message plaintext, unencrypted
+SDP/ICE (which contains IP addresses, DTLS fingerprints, and ICE credentials).
+
+### 2.2 Adversary P — The Remote Peer
+
+The remote peer is a legitimate counterparty who will learn the device's IP
+address if it is handed to them through ICE candidates.
+
+**Defended by:** Control (b) — ICE candidate filtering drops raw host IP
+addresses and scrubs `raddr`/`rport` from server-reflexive candidates. For
+high-privacy contacts, relay-only mode gathers only TURN-relayed candidates so
+the peer never learns the device's IP at all.
+
+### 2.3 Non-substitutability
+
+These two controls are independently necessary:
+
+- **Sealing without ICE filtering:** the board is blind, but the peer reads the
+  raw LAN/host IP inside the sealed blob.
+- **ICE filtering without sealing:** the peer sees less, but the board reads
+  everything in cleartext.
+
+### 2.4 What ORP Does Not Defend Against
+
+- **Endpoint key compromise.** If an attacker obtains a device's transport
+  private key, they can retroactively decrypt all recorded traffic sealed to
+  that key. This is the accepted cost of the static-key message layer
+  ([Section 10.2](#102-no-forward-secrecy-at-the-message-layer)).
+- **Traffic analysis and timing metadata.** The board learns who sends intent
+  toward whom and when. This is metadata leakage, not a blindness violation, and
+  is documented as a limitation.
+- **Physical device seizure.** Key material stored on a device is accessible to
+  an attacker with physical access. Client implementations should use OS-native
+  secure hardware (Secure Enclave, Android Keystore, TPM) where available.
+
+## 3. Identity and Key Management
+
+### 3.1 Dual Keypair Model
+
+Each device holds two keypairs, never reused for each other's purpose:
+
+| Key | Curve | Purpose |
+| --- | --- | --- |
+| Identity / signing | Ed25519 | Device identity; signs every announce and frame |
+| Transport | X25519 | ECDH target for sealing SDP/ICE and messages |
+
+The identity key (`self_key`) is the device's address — the only required
+identifier, shared via QR code or paste. The transport key is never placed in
+presence or intent records (anti-harvesting); it is exchanged only inside an
+active match's temporary signaling channel.
+
+### 3.2 Key Binding
+
+A signed binding proves the X25519 transport key belongs to the Ed25519
+identity. Without it, a man-in-the-middle could substitute its own transport key
+and read the "sealed" signaling.
+
+```
+binding = {
+  identity_key   : b64u(Ed25519 pub),
+  transport_key  : b64u(X25519 pub),
+  created_utc    : ISO-8601,
+  binding_sig    : Ed25519.sign(canonical({identity_key, transport_key, created_utc}))
+}
+```
+
+A peer MUST verify the binding before sealing anything to a transport key.
+
+### 3.3 Private Key Handling
+
+Private keys are generated locally and held in private fields within the
+`DeviceIdentity` object. They are never serialized, exported, logged, or sent.
+The only export path is `exportPublic()`, which emits public keys and the
+binding. Signing is performed through a `Signer` interface so the signing key
+never leaves the object.
+
+### 3.4 Identity Rotation (ORP-004)
+
+A device can replace its identity key while preserving its social graph through
+a signed migration protocol:
+
+1. The old key signs a `key_migration` record authorizing the replacement.
+2. The new key co-signs the same record, proving it consents and controls the
+   replacement key.
+3. The record includes a valid binding for the new key so recipients can
+   immediately seal to it.
+4. Both keys are honored during a configurable dual-validity window, after which
+   the old key retires.
+
+An optional challenge-response verification (ORP-008) allows recipients to
+cryptographically verify that the same live entity controls both transport keys,
+enabling automatic acceptance without manual user confirmation.
+
+## 4. Wire Protocol
+
+### 4.1 Message Types
+
+The protocol uses four wire message types. JSON Schemas are normative, and
+`additionalProperties: false` is load-bearing — it mechanically forbids fields
+that would violate the blindness invariant.
+
+- **Presence** — an always-on beacon containing only: identity key, boards
+  scope, WebRTC capabilities, session nonce, timestamp, signature, and an
+  optional push token. No IP, no transport key, no SDP, no target.
+- **Intent** — sent when initiating contact, containing only: initiator's
+  identity key, target's identity key, session nonce, timestamp, signature. No
+  SDP, no ICE candidates.
+- **Match offer / Match answer** — exchanged after a match through the temporary
+  signaling channel. In the KEY phase, they carry public transport keys and
+  bindings. In the SIGNALING phase, they carry sealed-box ciphertext of SDP/ICE.
+  The board relays these as opaque blobs.
+
+### 4.2 Transport Envelope
+
+The board-client transport uses a simple JSON envelope:
+
+```
+client -> board : {kind: "presence", record}
+                | {kind: "intent",   record}
+                | {kind: "relay", match_id, frame_kind, blob}
+
+board -> client : {kind: "ack" | "rejected" | "evicted", ...}
+                | {kind: "match", match_id, role, counterparty_key}
+                | {kind: "relay", match_id, frame_kind, blob}
+                | {kind: "channel_closed", match_id, reason}
+```
+
+### 4.3 Canonicalization and Signatures
+
+Every announce and frame is signed with the author's Ed25519 key over the
+canonical encoding (recursively sorted keys, compact, no NaN/Infinity) of the
+record with the signature field removed. The board and all receivers reject
+unsigned or invalid-signature records before acting on them.
+
+## 5. The Two-Stage Match
+
+Connection establishment is split into two stages to avoid placing SDP (which
+contains IP addresses and DTLS fingerprints) in the FIFO table where it would
+sit in the board's memory.
+
+**Stage 1: Discovery.** A device's presence beacon (containing only its identity
+key) sits in the board's FIFO table. When another device sends an intent
+targeting that key, the board matches them and issues a temporary signaling
+channel keyed by a random `match_id`.
+
+**Stage 2: Signaling.** The matched peers exchange transport keys (KEY phase)
+and then sealed SDP/ICE (SIGNALING phase) through the temporary channel. SDP
+offers, answers, and ICE candidates are generated fresh on demand, filtered
+(Control b), and sealed to the recipient's transport key (Control a) before
+reaching the board.
+
+The KEY phase resolves the bootstrap problem — how does the initiator learn the
+responder's transport key without putting it in the always-on presence beacon? —
+by exchanging transport keys only inside an active match, preventing passive
+mass harvesting.
+
+## 6. Cryptographic Primitives
+
+| Use | Primitive | Library |
+| --- | --- | --- |
+| Identity / signatures / binding | Ed25519 | `@noble/curves` |
+| ECDH (sealing, message key) | X25519 | `@noble/curves` |
+| AEAD | XChaCha20-Poly1305 | `@noble/ciphers` |
+| KDF | HKDF-SHA256 | `@noble/hashes` |
+| Sealed box | ephemeral-X25519 + HKDF + XChaCha20-Poly1305 | this protocol |
+
+The sealed box construction follows the `crypto_box_seal` pattern: an ephemeral
+X25519 keypair is generated for each seal operation, the shared secret is
+derived via ECDH between the ephemeral private key and the recipient's transport
+public key, and the plaintext is encrypted with XChaCha20-Poly1305. The
+ephemeral public key is prepended to the ciphertext so the recipient can derive
+the same shared secret.
+
+DTLS transit security and transit forward secrecy are provided by the underlying
+WebRTC stack, not by these primitives. What ORP adds on top is authenticating
+the DTLS fingerprint exchange (via sealing) and independent message-layer
+encryption keyed off long-term identity-bound transport keys.
+
+## 7. Board Architecture
+
+### 7.1 RAM-Only, Unified FIFO Table
+
+The board holds a single FIFO table shared by presence and intent records. Side
+hash indexes (`self_key` for presence, `target_key` for intent) keep matching
+O(1). The table is never persisted, never logged, and sized to available RAM via
+an injectable memory monitor.
+
+Records leave the table for exactly three reasons: matched (intents only),
+evicted by capacity overflow (oldest-out), or superseded by a presence refresh
+for the same identity (ORP-003). All removals go through a single `removeEntry()`
+function.
+
+### 7.2 Channel Lifetime
+
+The temporary signaling channel is the only per-match state the board holds:
+
+- Torn down on the first successful answer relay OR after timeout T (default 30
+  seconds).
+- RAM-only, never persisted or logged.
+- Keyed by an ephemeral random `match_id` discarded on teardown.
+- Only the two matched participants may use it.
+- An offer must be relayed before an answer can trigger teardown (prevents a
+  rendezvous-DoS).
+
+This stateful surface cannot grow into a session store: it holds no message
+content, has a hard TTL, is not keyed by anything durable, and is never
+persisted.
+
+### 7.3 Abuse Mitigation (ORP-005)
+
+- Per-identity announce rate limiting (token bucket)
+- Match throttling per initiator
+- Concurrent-channel caps per identity
+- Optional proof-of-work hook
+- All controls operate on public routing metadata only (no secret involved)
+
+### 7.4 Replay Protection (ORP-002)
+
+A freshness window (default 120 seconds) and a bounded seen-nonce cache reject
+stale, future-dated, and replayed presence/intent records. The cache is bounded
+by the freshness window so it cannot grow without bound.
+
+### 7.5 Wake Notification (ORP-009)
+
+When a signaling channel times out (the responder never completed the
+handshake), the board may fire a single, contentless push notification to the
+responder's platform push token if one was included in their signed presence
+record. The notification carries zero content — it only signals the device to
+reconnect. This is opt-in per device and documented as a metadata trade-off
+([Section 10](#10-deliberate-limitations)).
+
+## 8. Delivery Layer
+
+### 8.1 Per-Message ACK with One-Time Keys
+
+Each message carries a fresh, one-time X25519 keypair. The recipient seals a
+delivery acknowledgement to the sender's one-time public key. Only the sender
+can unseal it. A forged or wrong-key ACK cannot clear the sender's pending
+queue.
+
+The ACK is gated on the recipient application's confirmation of durable storage
+(ORP-001): the recipient sends no ACK until the message is persisted. A crash
+between receipt and persistence emits no ACK, so the sender retains the message
+rather than silently losing it.
+
+### 8.2 Recipient-Sealed Messages (ORP-007)
+
+Message bodies are sealed to the recipient's long-term transport key before
+entering the SecureChannel, creating double encryption: SecureChannel encryption
+on the outside (transit) and a recipient-sealed body on the inside. Even
+something that peels the channel layer cannot read the message without the
+recipient's transport private key.
+
+## 9. Neighbor Propagation (ORP-006)
+
+A single board only matches devices connected to it. Regional reach across a
+mesh of community boards is achieved by propagating already-device-signed
+presence/intent records between neighboring boards within four bounds:
+
+- **Hop limit** — bounds mesh diameter
+- **Freshness limit** — bounds circulation time (reuses ORP-002 machinery)
+- **Duplicate suppression** — per-nonce dedup + visited-board path prevents loops
+- **Scope** — a device's `boards_scope` governs which neighbors receive its
+  presence
+
+The inner device signature is re-verified on every hop. Propagation extends
+discovery, not transport — completing a rendezvous still requires both peers on
+a shared board.
+
+## 10. Deliberate Limitations
+
+### 10.1 No Store-and-Forward
+
+Matching is synchronous: both peers must be online in the same window. An intent
+toward an absent target waits transiently in RAM and may be evicted. The push
+notification mechanism (ORP-009) mitigates this by waking sleeping devices, but
+the board never holds or relays a message.
+
+### 10.2 No Forward Secrecy at the Message Layer
+
+Message keys are derived once from the two peers' long-term X25519 transport keys
+(no ratchet). DTLS provides transit forward secrecy, but the message layer does
+not: endpoint transport-key compromise enables retroactive decryption of all
+recorded traffic.
+
+This is a deliberate, final design decision. A ratchet would decouple the
+encryption target from the permanent identity-bound transport key, breaking the
+fixed one-key-one-target address model and reintroducing the coordination state
+this protocol exists to avoid.
+
+### 10.3 Metadata Leakage
+
+The board learns who sends intent toward whom and when. This is documented as a
+real limitation with future mitigations (pseudonym rotation, cover traffic)
+noted as out-of-scope for the reference implementation.
+
+### 10.4 Push Token Metadata
+
+Devices that opt into push notifications (ORP-009) reveal their platform push
+token to the board, tying their ORP identity to a specific device and platform
+account. This is an informed, per-device choice: instant reachability in
+exchange for device-level metadata, or anonymity in exchange for being reachable
+only while the app is open.
+
+## 11. Verification Methodology
+
+The reference implementation includes 159 adversarial tests across 19 test
+files. Key verification approaches:
+
+- **Blindness verification.** Given the board's full logs (every announce, every
+  relayed blob, every `match_id`), no SDP, IP, plaintext, or private key is
+  recoverable. Scanned in base64url, Latin-1, and hex. Positive controls confirm
+  the sealed blobs are genuinely undecryptable without the key.
+- **Wire verification.** The real WebRTC adapter (via `werift`) intercepts the
+  actual UDP datagrams leaving the process and confirms the plaintext message
+  never appears in the literal bytes on the wire.
+- **Adversarial injection.** Transport-key substitution, foreign/forged
+  bindings, forged outer signatures, unexpected senders, tampered sealed blobs,
+  third-party channel injection, spoofed early answers, and replay attempts are
+  all tested and rejected.
+- **Migration chain verification.** Forged old/new signatures, tampered signed
+  fields, mismatched bindings, self-migrations, and cycle-bounded chain
+  resolution are tested.
+- **Push wake verification.** Push fires exactly once on timeout with token
+  present, does not fire on normal completion, does not fire without a token, is
+  a no-op without a configured sender, uses the latest token after presence
+  supersede, and a throwing sender cannot break the timeout teardown.
+
+## 12. Licensing
+
+The protocol is multi-licensed by component:
+
+- **Core protocol, client library, specification, and tests:** Apache-2.0. Fork
+  and build clients freely, including commercial ones. The patent grant protects
+  independent implementers.
+- **Reference board:** AGPL-3.0-or-later. Anyone running a modified board as a
+  public service must publish their source, so users can verify it is still
+  blind.
+
+A client depends only on the Apache protocol interface and never on the AGPL
+board, so a client carries no copyleft obligation. Anyone may also build their
+own board from the Apache specification under any license.
+
+## 13. Conclusion
+
+ORP demonstrates that a messaging relay can be architecturally blind —
+zero-knowledge of message content, connection data, or private keys — without
+sacrificing the practical utility of centralized discovery. The protocol
+achieves this through invariant-first design, two independent confidentiality
+controls, adversarial verification, and honest documentation of the trade-offs
+it accepts.
+
+The reference implementation, including the blind board, the two-stage match
+client, the delivery ACK layer, identity rotation with challenge-response
+verification, neighbor propagation, and push wake notifications, is available
+under Apache-2.0 (client/core) and AGPL-3.0 (board) at
+[github.com/Prograde-Solutions/orp](https://github.com/Prograde-Solutions/orp).
+
+Open Relay Protocol is developed by Prograde Solutions. The `@noble`
+cryptography libraries by Paul Miller provide the audited Ed25519, X25519,
+XChaCha20-Poly1305, and HKDF-SHA256 implementations the protocol depends on.
 
 
 =====================================================

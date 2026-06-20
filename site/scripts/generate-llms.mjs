@@ -14,6 +14,7 @@ const docsDir = join(root, "src", "content", "docs");
 const pages = [
   ["docs/overview.mdx", "/docs/overview/"],
   ["docs/quickstart.mdx", "/docs/quickstart/"],
+  ["docs/whitepaper.mdx", "/docs/whitepaper/"],
   ["docs/protocol.mdx", "/docs/protocol/"],
   ["docs/blindness.mdx", "/docs/blindness/"],
   ["docs/crypto.mdx", "/docs/crypto/"],

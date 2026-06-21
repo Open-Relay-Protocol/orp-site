@@ -8,6 +8,8 @@
   --orp-violet: #9a7bff;
   --orp-magenta: #c879f9;
   --orp-serif: Georgia, "Times New Roman", "Iowan Old Style", serif;
+  /* Share Tech — the official ORP display/brand typeface (Google Fonts). */
+  --orp-display: "Share Tech", "Segoe UI", system-ui, sans-serif;
 }
 
 /* Starlight accent palette (violet). */
@@ -41,8 +43,14 @@
 .sl-markdown-content h3,
 .content-panel h1,
 h1#_top {
-  font-family: var(--orp-serif);
-  letter-spacing: 0.2px;
+  font-family: var(--orp-display);
+  letter-spacing: 0.5px;
+}
+
+/* Brand wordmark / site title in the docs nav uses the official face too. */
+.site-title {
+  font-family: var(--orp-display);
+  letter-spacing: 0.5px;
 }
 
 /* Source note block used at the foot of every reference page. */

@@ -20,7 +20,7 @@ Fix these first; they are cheap and they gate the rest.
 | --- | --- | --- | --- |
 | **F1** | The GitHub repo `github.com/Prograde-Solutions/orp` returns **HTTP 404** (private or not yet pushed). Every "View on GitHub" CTA — the primary conversion on the whole site — lands on a dead page. | You cannot convert to GitHub, show stars, count contributors, or earn developer trust against a repo nobody can open. This nullifies deliverable goals 3 and 4 entirely. | Make the repo public (or fix the URL). Until then, trust indicators have nothing real to read and must not be faked. |
 | **F2** | A literal `TODO: confirm the test count and scan names against the repo` is **rendered on the live homepage** (proof section, `index.astro:286`). | A visible "TODO" on a *security* product's landing page is the inverse of developer trust. It signals the claims are unverified — which, per `OPEN-QUESTIONS.md`, they are. | Remove the TODO from the rendered page. State only what is verified; move unverified numbers behind verified-or-omitted. |
-| **F3** | **Brand name is inconsistent.** Domain = *open**relay**protocol.com*; all content, README, and `REPO-INVENTORY.md` = *Open **Rendezvous** Protocol*. | Search engines, answer engines, and humans need one canonical name. Splitting "Relay" vs "Rendezvous" fractures brand search, backlinks, and schema `name`. | Pick one. Recommendation: **Open Rendezvous Protocol** — it is technically accurate (the server brokers a rendezvous; it is *not* a content relay) and already used everywhere in content. Then redirect/own the other term. This redesign standardizes on "Open Rendezvous Protocol (ORP)." |
+| **F3** | **Brand name is inconsistent.** Domain = *open**relay**protocol.com*; all content, README, and `REPO-INVENTORY.md` = *Open **Rendezvous** Protocol*. | Search engines, answer engines, and humans need one canonical name. Splitting "Relay" vs "Rendezvous" fractures brand search, backlinks, and schema `name`. | Pick one. **Resolved: Open Relay Protocol** — it matches the canonical domain (*openrelayprotocol.com*) and the white paper, with "rendezvous" retained as the technical term for the meeting the board brokers. Standardized on "Open Relay Protocol (ORP)." |
 
 > Everything below assumes F1–F3 are being resolved. The implemented homepage
 > is built so that the moment the repo is public, the live trust indicators
@@ -240,7 +240,7 @@ Proposed (future, optional — close keyword gaps, low priority):
 │ HEADER  [ORP logo]            How it works · Compare · Docs · [★ GitHub]│  sticky, star count in button
 ├──────────────────────────────────────────────────────────────────────┤
 │ 1. HERO                                                                │
-│   eyebrow: Open Rendezvous Protocol · Apache-2.0 / AGPL-3.0            │
+│   eyebrow: Open Relay Protocol · Apache-2.0 / AGPL-3.0                │
 │   H1: Secure WebRTC signaling whose server can't read your signaling. │
 │   sub: ORP is an open, privacy-preserving rendezvous protocol… (who/why)│
 │   [★ Star on GitHub]   [Read the docs →]                               │
@@ -279,7 +279,7 @@ Proposed (future, optional — close keyword gaps, low priority):
 > the keyword clusters without stuffing.
 
 ### 1 — Hero
-- **Eyebrow:** `Open Rendezvous Protocol · Apache-2.0 core, AGPL-3.0 board`
+- **Eyebrow:** `Open Relay Protocol · Apache-2.0 core, AGPL-3.0 board`
 - **H1:** **Secure WebRTC signaling whose server can't read your signaling.**
 - **Subheadline:** ORP is an open, privacy-preserving rendezvous protocol for
   peer-to-peer and WebRTC apps. Two devices meet through a server that is

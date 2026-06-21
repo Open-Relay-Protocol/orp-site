@@ -1,5 +1,5 @@
 /* ORP brand tokens. Deep indigo-storm base, violet/teal neon accents,
-   serif headings. Palette drawn from the site's atmospheric artwork. */
+   Share Tech display headings. Palette drawn from the site's artwork. */
 :root {
   --orp-bg-dark: #0a0c18;
   --orp-primary: #5b3fd6;
@@ -7,7 +7,6 @@
   --orp-teal: #38e0d0;
   --orp-violet: #9a7bff;
   --orp-magenta: #c879f9;
-  --orp-serif: Georgia, "Times New Roman", "Iowan Old Style", serif;
   /* Share Tech — the official ORP display/brand typeface (Google Fonts). */
   --orp-display: "Share Tech", "Segoe UI", system-ui, sans-serif;
 }

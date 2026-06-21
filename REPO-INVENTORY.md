@@ -16,7 +16,7 @@
 
 ## Canonical definition
 
-ORP (Open Rendezvous Protocol) is a device-first messaging protocol whose
+ORP (Open Relay Protocol) is a device-first messaging protocol whose
 rendezvous server is structurally unable to read message contents, keys, or
 unsealed signaling. The server brokers a meeting between two devices that
 already share one key bound to one target, and that structural blindness is

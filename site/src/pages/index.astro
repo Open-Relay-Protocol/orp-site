@@ -76,7 +76,7 @@ const jsonLd = [
   {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
-    name: "ORP (Open Rendezvous Protocol)",
+    name: "ORP (Open Relay Protocol)",
     description,
     url: canonical,
     codeRepository: GITHUB_URL,
@@ -150,40 +150,14 @@ const jsonLd = [
     <div id="orp-bg" class="bg-scene" aria-hidden="true"></div>
 
     <header class="site-header">
-      <a class="brand" href={base} aria-label="ORP home">
-        <svg
+      <a class="brand" href={base} aria-label="Open Relay Protocol home">
+        <img
           class="brand-mark"
-          viewBox="0 0 168 40"
-          role="img"
-          aria-hidden="true"
-        >
-          <g transform="translate(20 20)">
-            <ellipse
-              cx="0"
-              cy="0"
-              rx="18"
-              ry="11"
-              transform="rotate(-20)"
-              fill="none"
-              stroke="#2F74E6"
-              stroke-width="2.4"></ellipse>
-            <g stroke="#ffffff" stroke-width="1.6" stroke-linecap="round">
-              <line x1="-7" y1="2.4" x2="6.5" y2="-2.4"></line>
-              <line x1="-4.5" y1="-0.6" x2="-2.5" y2="2"></line>
-              <line x1="-1.5" y1="-1.6" x2="0.5" y2="1"></line>
-              <line x1="1.5" y1="-2.6" x2="3.5" y2="0"></line>
-            </g>
-          </g>
-          <text
-            x="46"
-            y="28"
-            font-family="Georgia, serif"
-            font-size="26"
-            font-weight="700"
-            letter-spacing="1.5"
-            fill="#ffffff">ORP</text
-          >
-        </svg>
+          src={href("/logos/orp-logo-white.png")}
+          alt="Open Relay Protocol"
+          width="40"
+          height="40"
+        />
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href={href("#how-it-works")}>How it works</a>
@@ -211,7 +185,7 @@ const jsonLd = [
       <!-- 1. HERO -->
       <section class="hero">
         <p class="eyebrow">
-          Open Rendezvous Protocol · Apache-2.0 core, AGPL-3.0 board
+          Open Relay Protocol · Apache-2.0 core, AGPL-3.0 board
         </p>
         <h1>
           Secure WebRTC signaling whose server
@@ -723,7 +697,7 @@ const answer = sealedbox.open(await session.recv());">Copy</button>
 
     <footer class="site-footer">
       <p>
-        ORP, the Open Rendezvous Protocol. Core, client, spec, and tests under
+        ORP, the Open Relay Protocol. Core, client, spec, and tests under
         Apache-2.0; the board under AGPL-3.0.
       </p>
       <nav aria-label="Footer">
@@ -943,8 +917,8 @@ const answer = sealedbox.open(await session.recv());">Copy</button>
         max-width: 1080px;
       }
       .brand-mark {
-        width: 132px;
-        height: 32px;
+        height: 40px;
+        width: auto;
         display: block;
       }
       .site-nav {

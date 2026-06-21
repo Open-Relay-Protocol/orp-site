@@ -17,10 +17,10 @@ export default defineConfig({
       description:
         "ORP is a device-first messaging protocol whose rendezvous server is structurally unable to read message contents, keys, or unsealed signaling.",
       logo: {
-        light: "./src/assets/logo_mark.svg",
-        dark: "./src/assets/logo_white.svg",
+        light: "./src/assets/orp-logo-black.png",
+        dark: "./src/assets/orp-logo-white.png",
         replacesTitle: false,
-        alt: "ORP",
+        alt: "Open Relay Protocol",
       },
       social: [
         { icon: "github", label: "GitHub", href: GITHUB_URL },

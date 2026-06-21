@@ -31,6 +31,26 @@ export default defineConfig({
       },
       head: [
         { tag: "meta", attrs: { name: "theme-color", content: "#0E1726" } },
+        // Share Tech: the official ORP display/brand typeface (Google Fonts).
+        {
+          tag: "link",
+          attrs: { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        },
+        {
+          tag: "link",
+          attrs: {
+            rel: "preconnect",
+            href: "https://fonts.gstatic.com",
+            crossorigin: true,
+          },
+        },
+        {
+          tag: "link",
+          attrs: {
+            rel: "stylesheet",
+            href: "https://fonts.googleapis.com/css2?family=Share+Tech&display=swap",
+          },
+        },
       ],
       sidebar: [
         {

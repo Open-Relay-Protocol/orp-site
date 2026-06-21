@@ -115,6 +115,18 @@ const jsonLd = [
     <link rel="icon" href={href("/favicon.svg")} type="image/svg+xml" />
     <meta name="theme-color" content="#0E1726" />
 
+    <!-- Share Tech: the official ORP display/brand typeface. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Share+Tech&display=swap"
+    />
+
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -891,7 +903,8 @@ const answer = sealedbox.open(await session.recv());">Copy</button>
       h1,
       h2,
       h3 {
-        font-family: var(--orp-serif);
+        font-family: var(--orp-display);
+        letter-spacing: 0.5px;
         color: #f4f7fc;
         line-height: 1.15;
       }
@@ -1259,7 +1272,7 @@ const answer = sealedbox.open(await session.recv());">Copy</button>
         box-shadow: 0 18px 40px -24px rgba(154, 123, 255, 0.6);
       }
       .card-num {
-        font-family: var(--orp-serif);
+        font-family: var(--orp-display);
         font-size: 0.85rem;
         font-weight: 700;
         letter-spacing: 1px;
@@ -1355,7 +1368,7 @@ const answer = sealedbox.open(await session.recv());">Copy</button>
         border-bottom: 1px solid #1a1830;
       }
       .cmp-table thead th {
-        font-family: var(--orp-serif);
+        font-family: var(--orp-display);
         color: #d7d0ff;
         font-size: 1rem;
         background: #11132b;

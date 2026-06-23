@@ -23,4 +23,4 @@ function normalizeBase(b) {
 
 export const SITE = process.env.SITE_URL || "https://www.openrelayprotocol.com";
 export const BASE = normalizeBase(process.env.BASE_PATH);
-export const GITHUB_URL = "https://github.com/Prograde-Solutions/orp";
+export const GITHUB_URL = "https://github.com/Open-Relay-Protocol/orp";

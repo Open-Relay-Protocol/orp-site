@@ -8,7 +8,7 @@ An enforced invariant, not a logging policy.
 > [!NOTE]
 > This repository holds the **website** (Astro + Starlight) plus planning
 > docs. The protocol source of truth lives in the upstream
-> [`Prograde-Solutions/orp`](https://github.com/Prograde-Solutions/orp) repo.
+> [`Open-Relay-Protocol/orp`](https://github.com/Open-Relay-Protocol/orp) repo.
 > The site was authored from a build handoff brief; every protocol claim is
 > tracked for verification against the real `SPEC.md` and `core/` sources in
 > [`OPEN-QUESTIONS.md`](./OPEN-QUESTIONS.md).

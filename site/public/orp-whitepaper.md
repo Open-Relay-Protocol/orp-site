@@ -4,7 +4,7 @@
 
 **Authors:** Justin Avant, Ben Jammin
 
-**Reference implementation:** [github.com/Prograde-Solutions/orp](https://github.com/Prograde-Solutions/orp)
+**Reference implementation:** [github.com/Open-Relay-Protocol/orp](https://github.com/Open-Relay-Protocol/orp)
 
 ---
 
@@ -470,7 +470,7 @@ The reference implementation, including the blind board, the two-stage match
 client, the delivery ACK layer, identity rotation with challenge-response
 verification, neighbor propagation, and push wake notifications, is available
 under Apache-2.0 (client/core) and AGPL-3.0 (board) at
-[github.com/Prograde-Solutions/orp](https://github.com/Prograde-Solutions/orp).
+[github.com/Open-Relay-Protocol/orp](https://github.com/Open-Relay-Protocol/orp).
 
 Open Relay Protocol is developed by Prograde Solutions. The `@noble`
 cryptography libraries by Paul Miller provide the audited Ed25519, X25519,

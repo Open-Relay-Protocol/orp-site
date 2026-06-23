@@ -10,7 +10,7 @@ Resolve each item against the real repo before publishing.
 
 1. The site was built from the handoff brief, not from `SPEC.md` and
    `core/`. Re-verify every protocol claim, section number, and code
-   reference against the upstream `Prograde-Solutions/orp` repo. Until then,
+   reference against the upstream `Open-Relay-Protocol/orp` repo. Until then,
    treat all `SPEC §X` citations as provisional.
 
 ## Domain

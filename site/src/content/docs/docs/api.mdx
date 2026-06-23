@@ -9,7 +9,7 @@ be generated from the `core/` sources; they are tracked as TODO in
 `OPEN-QUESTIONS.md` until the source is available to introspect.
 
 :::note
-Each module below links to its source on GitHub. Replace `Prograde-Solutions/orp`
+Each module below links to its source on GitHub. Replace `Open-Relay-Protocol/orp`
 and confirm the file paths once the repository layout is verified.
 :::
 
@@ -18,79 +18,79 @@ and confirm the file paths once the repository layout is verified.
 Device identity keypairs and the identity-rotation primitives behind
 [ORP-004](/docs/identity-rotation/).
 
-Source: [`core/identity`](https://github.com/Prograde-Solutions/orp/blob/main/core/identity.ts)
+Source: [`core/identity`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/identity.ts)
 
 ## canonical
 
 Canonical JSON serialization used as the stable input to signing and sealing.
 
-Source: [`core/canonical`](https://github.com/Prograde-Solutions/orp/blob/main/core/canonical.ts)
+Source: [`core/canonical`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/canonical.ts)
 
 ## sign
 
 Detached signatures over canonical JSON.
 
-Source: [`core/sign`](https://github.com/Prograde-Solutions/orp/blob/main/core/sign.ts)
+Source: [`core/sign`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/sign.ts)
 
 ## sealedbox
 
 Sealed-box encryption (control a): payloads the board cannot open.
 
-Source: [`core/sealedbox`](https://github.com/Prograde-Solutions/orp/blob/main/core/sealedbox.ts)
+Source: [`core/sealedbox`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/sealedbox.ts)
 
 ## ice
 
 ICE candidate handling and the ICE transport policy (control b).
 
-Source: [`core/ice`](https://github.com/Prograde-Solutions/orp/blob/main/core/ice.ts)
+Source: [`core/ice`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/ice.ts)
 
 ## messagelayer
 
 The static inner message layer carried inside the sealed channel.
 
-Source: [`core/messagelayer`](https://github.com/Prograde-Solutions/orp/blob/main/core/messagelayer.ts)
+Source: [`core/messagelayer`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/messagelayer.ts)
 
 ## schemas
 
 JSON Schemas for the wire frames and message payloads.
 
-Source: [`core/schemas`](https://github.com/Prograde-Solutions/orp/blob/main/core/schemas.ts)
+Source: [`core/schemas`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/schemas.ts)
 
 ## wire
 
 Wire frame encode/decode, including the `frame_kind` routing tag.
 
-Source: [`core/wire`](https://github.com/Prograde-Solutions/orp/blob/main/core/wire.ts)
+Source: [`core/wire`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/wire.ts)
 
 ## protocol
 
 The KEY/offer/answer state machine and rendezvous orchestration.
 
-Source: [`core/protocol`](https://github.com/Prograde-Solutions/orp/blob/main/core/protocol.ts)
+Source: [`core/protocol`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/protocol.ts)
 
 ## deliverylayer
 
 The delivery acknowledgement layer (SPEC §11).
 
-Source: [`core/deliverylayer`](https://github.com/Prograde-Solutions/orp/blob/main/core/deliverylayer.ts)
+Source: [`core/deliverylayer`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/deliverylayer.ts)
 
 ## migration
 
 Identity and state migration support, related to identity rotation.
 
-Source: [`core/migration`](https://github.com/Prograde-Solutions/orp/blob/main/core/migration.ts)
+Source: [`core/migration`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/migration.ts)
 
 ## propagation
 
 Neighbor propagation between board nodes ([ORP-006](/docs/neighbor-propagation/)).
 
-Source: [`core/propagation`](https://github.com/Prograde-Solutions/orp/blob/main/core/propagation.ts)
+Source: [`core/propagation`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/propagation.ts)
 
 ## clock
 
 The time source / clock abstraction used for ordering and expiry.
 
-Source: [`core/clock`](https://github.com/Prograde-Solutions/orp/blob/main/core/clock.ts)
+Source: [`core/clock`](https://github.com/Open-Relay-Protocol/orp/blob/main/core/clock.ts)
 
 <div class="orp-source">
   <strong>Source:</strong> the core/ module exports. TODO: generate exported

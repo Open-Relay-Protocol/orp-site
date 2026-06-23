@@ -18,7 +18,7 @@ Fix these first; they are cheap and they gate the rest.
 
 | # | Finding | Why it dominates | Fix |
 | --- | --- | --- | --- |
-| **F1** | The GitHub repo `github.com/Prograde-Solutions/orp` returns **HTTP 404** (private or not yet pushed). Every "View on GitHub" CTA — the primary conversion on the whole site — lands on a dead page. | You cannot convert to GitHub, show stars, count contributors, or earn developer trust against a repo nobody can open. This nullifies deliverable goals 3 and 4 entirely. | Make the repo public (or fix the URL). Until then, trust indicators have nothing real to read and must not be faked. |
+| **F1** | The GitHub repo `github.com/Open-Relay-Protocol/orp` returns **HTTP 404** (private or not yet pushed). Every "View on GitHub" CTA — the primary conversion on the whole site — lands on a dead page. | You cannot convert to GitHub, show stars, count contributors, or earn developer trust against a repo nobody can open. This nullifies deliverable goals 3 and 4 entirely. | Make the repo public (or fix the URL). Until then, trust indicators have nothing real to read and must not be faked. |
 | **F2** | A literal `TODO: confirm the test count and scan names against the repo` is **rendered on the live homepage** (proof section, `index.astro:286`). | A visible "TODO" on a *security* product's landing page is the inverse of developer trust. It signals the claims are unverified — which, per `OPEN-QUESTIONS.md`, they are. | Remove the TODO from the rendered page. State only what is verified; move unverified numbers behind verified-or-omitted. |
 | **F3** | **Brand name is inconsistent.** Domain = *open**relay**protocol.com*; all content, README, and `REPO-INVENTORY.md` = *Open **Rendezvous** Protocol*. | Search engines, answer engines, and humans need one canonical name. Splitting "Relay" vs "Rendezvous" fractures brand search, backlinks, and schema `name`. | Pick one. **Resolved: Open Relay Protocol** — it matches the canonical domain (*openrelayprotocol.com*) and the white paper, with "rendezvous" retained as the technical term for the meeting the board brokers. Standardized on "Open Relay Protocol (ORP)." |
 
@@ -185,10 +185,10 @@ quickstart run. The current page under-serves both.
 **Trust badges to display (live, never hardcoded):**
 `shields.io` endpoints render real-time from the GitHub repo and degrade to
 descriptive `alt` text if blocked:
-- Stars: `img.shields.io/github/stars/Prograde-Solutions/orp`
-- Contributors: `…/github/contributors/Prograde-Solutions/orp`
-- Last commit: `…/github/last-commit/Prograde-Solutions/orp`
-- License: `…/github/license/Prograde-Solutions/orp`
+- Stars: `img.shields.io/github/stars/Open-Relay-Protocol/orp`
+- Contributors: `…/github/contributors/Open-Relay-Protocol/orp`
+- Last commit: `…/github/last-commit/Open-Relay-Protocol/orp`
+- License: `…/github/license/Open-Relay-Protocol/orp`
 - Top language / repo size as desired.
 
 > **Honesty rule preserved:** no fabricated stars/metrics. Badges read live;

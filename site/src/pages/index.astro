@@ -24,11 +24,19 @@ const badge = (path, label, alt) => ({
   alt,
   label,
 });
+// Static badge for facts GitHub can't derive from a single SPDX file. The repo
+// ships a split license (Apache-2.0 core/client/spec/tests, AGPL-3.0 board), so
+// the live github/license badge reports "not identifiable"; state it directly.
+const staticBadge = (message, alt) => ({
+  src: `https://img.shields.io/badge/license-${message}-5b3fd6?style=flat-square&labelColor=0b0c1a`,
+  alt,
+  label: "license",
+});
 const badges = [
   badge(`github/stars/${GITHUB_SLUG}`, "stars", "GitHub stars"),
   badge(`github/contributors/${GITHUB_SLUG}`, "contributors", "GitHub contributors"),
   badge(`github/last-commit/${GITHUB_SLUG}`, "last commit", "Last commit"),
-  badge(`github/license/${GITHUB_SLUG}`, "license", "License"),
+  staticBadge("Apache--2.0%20%2F%20AGPL--3.0", "License: Apache-2.0 / AGPL-3.0"),
   badge(`github/languages/top/${GITHUB_SLUG}`, "language", "Primary language"),
 ];
 
